@@ -2,7 +2,7 @@ package enumerators
 
 type filterMapper[TIn any, TOut any] struct {
 	base    Enumerator[TIn]
-	apply   func(TIn) (TOut, error, bool)
+	apply   func(TIn) (TOut, bool, error)
 	current TOut
 	err     error
 }
@@ -19,7 +19,7 @@ func (e *filterMapper[TIn, TOut]) MoveNext() bool {
 			return false
 		}
 
-		u, err, ok := e.apply(item)
+		u, ok, err := e.apply(item)
 
 		if err != nil {
 			e.err = err
@@ -49,7 +49,7 @@ func (e *filterMapper[TIn, TOut]) Dispose() {
 }
 
 // Map creates a mapped enumerator
-func FilterMap[TIn any, TOut any](enumerator Enumerator[TIn], apply func(TIn) (TOut, error, bool)) Enumerator[TOut] {
+func FilterMap[TIn any, TOut any](enumerator Enumerator[TIn], apply func(TIn) (TOut, bool, error)) Enumerator[TOut] {
 	return &filterMapper[TIn, TOut]{
 		base:  enumerator,
 		apply: apply,

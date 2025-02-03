@@ -11,18 +11,18 @@ type Generator[T any] struct {
 	onNext    func() (T, bool, error)
 	onDispose func()
 	current   T
-	done      bool
+	hasNext   bool
 	err       error
 	dispose   sync.Once
 	disposed  bool
 }
 
 // Create a new generator.
-func NewGenerator[T any](next func() (T, bool, error)) Enumerator[T] {
+func Generate[T any](next func() (T, bool, error)) Enumerator[T] {
 	return &Generator[T]{onNext: next}
 }
 
-func NewGeneratorWithDispose[T any](next func() (T, bool, error), dispose func()) Enumerator[T] {
+func GenerateAndDispose[T any](next func() (T, bool, error), dispose func()) Enumerator[T] {
 	return &Generator[T]{
 		onNext:    next,
 		onDispose: dispose,
@@ -31,8 +31,8 @@ func NewGeneratorWithDispose[T any](next func() (T, bool, error), dispose func()
 
 // Dispose cleans up the enumerator.
 func (ce *Generator[T]) Dispose() {
-	ce.done = true
 	ce.dispose.Do(func() {
+		ce.hasNext = false
 		if ce.onDispose != nil {
 			ce.onDispose()
 		}
@@ -42,12 +42,12 @@ func (ce *Generator[T]) Dispose() {
 
 // MoveNext generates the next value.
 func (ce *Generator[T]) MoveNext() bool {
-	if ce.done {
+	if !ce.hasNext {
 		return false
 	}
 
 	// Generate the next value
-	ce.current, ce.done, ce.err = ce.onNext()
+	ce.current, ce.hasNext, ce.err = ce.onNext()
 
 	return ce.err == nil
 }
