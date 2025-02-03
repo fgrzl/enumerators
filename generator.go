@@ -42,12 +42,12 @@ func (ce *Generator[T]) Dispose() {
 
 // MoveNext generates the next value.
 func (ce *Generator[T]) MoveNext() bool {
+	// Generate the next value
+	ce.current, ce.hasNext, ce.err = ce.onNext()
+
 	if !ce.hasNext {
 		return false
 	}
-
-	// Generate the next value
-	ce.current, ce.hasNext, ce.err = ce.onNext()
 
 	return ce.err == nil
 }
