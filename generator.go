@@ -65,3 +65,29 @@ func (ce *Generator[T]) Current() (T, error) {
 func (ce *Generator[T]) Err() error {
 	return ce.err
 }
+
+type KeyValuePair[K comparable, V any] struct {
+	Key   K
+	Value V
+}
+
+func GenerateFromMap[K comparable, V any](m map[K]V) Enumerator[*KeyValuePair[K, V]] {
+	keys := make([]K, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+
+	index := 0
+	return Generate(func() (*KeyValuePair[K, V], bool, error) {
+		if index >= len(keys) {
+			return nil, false, nil
+		}
+
+		key := keys[index]
+		index++
+
+		return &KeyValuePair[K, V]{Key: key, Value: m[key]}, true, nil
+	})
+}
