@@ -13,7 +13,7 @@ func TestChainEnumerator_Err(t *testing.T) {
 	enumerator2 := enumerators.Slice([]int{4, 5, 6})
 
 	// Act
-	chainEnum := enumerators.Chain([]enumerators.Enumerator[int]{enumerator1, enumerator2})
+	chainEnum := enumerators.Chain(enumerator1, enumerator2)
 
 	// Assert
 	slice, err := enumerators.ToSlice(chainEnum)

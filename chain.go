@@ -2,7 +2,7 @@ package enumerators
 
 import "errors"
 
-func Chain[T any](enumerators []Enumerator[T]) Enumerator[T] {
+func Chain[T any](enumerators ...Enumerator[T]) Enumerator[T] {
 	return &chainEnumerator[T]{enumerators: enumerators, index: 0}
 }
 
