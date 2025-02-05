@@ -1,12 +1,8 @@
 package enumerators
 
-import (
-	"github.com/fgrzl/streams/pkg/util"
-)
-
 // Enumerator interface for generic iteration.
 type Enumerator[T any] interface {
-	util.Disposable
+	Disposable
 	MoveNext() bool
 	Current() (T, error)
 	Err() error
