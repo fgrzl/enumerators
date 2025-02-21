@@ -47,20 +47,20 @@ func (p *PeekableEnumerator[T]) Err() error {
 }
 
 // Peek allows looking at the next element without advancing the enumerator
-func (p *PeekableEnumerator[T]) Peek() (T, error) {
+func (p *PeekableEnumerator[T]) Peek() (T, bool, error) {
 	if !p.hasPeeked {
 		if !p.inner.MoveNext() {
 			var zero T
-			return zero, errors.New("no more elements to peek")
+			return zero, false, errors.New("no more elements to peek")
 		}
 		p.peekValue, p.peekErr = p.inner.Current()
 		p.hasPeeked = true
 	}
-	return p.peekValue, p.peekErr
+	return p.peekValue, true, p.peekErr
 }
 
 // HasNext checks if there is a next element available without advancing the enumerator
 func (p *PeekableEnumerator[T]) HasNext() bool {
-	_, err := p.Peek()
-	return err == nil
+	_, hasNext, _ := p.Peek()
+	return hasNext
 }
