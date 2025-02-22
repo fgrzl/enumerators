@@ -1,9 +1,5 @@
 package enumerators
 
-import (
-	"errors"
-)
-
 // NewPeekableEnumerator constructs a PeekableEnumerator
 func Peekable[T any](inner Enumerator[T]) *PeekableEnumerator[T] {
 	return &PeekableEnumerator[T]{
@@ -51,7 +47,7 @@ func (p *PeekableEnumerator[T]) Peek() (T, bool, error) {
 	if !p.hasPeeked {
 		if !p.inner.MoveNext() {
 			var zero T
-			return zero, false, errors.New("no more elements to peek")
+			return zero, false, p.inner.Err()
 		}
 		p.peekValue, p.peekErr = p.inner.Current()
 		p.hasPeeked = true
