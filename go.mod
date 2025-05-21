@@ -1,6 +1,8 @@
 module github.com/fgrzl/enumerators
 
-go 1.23.0
+go 1.24.0
+
+retract v0.1.0--dev.18 // bad version, do not use
 
 require (
 	github.com/stretchr/testify v1.10.0
