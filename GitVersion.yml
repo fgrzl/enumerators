@@ -1,46 +1,45 @@
-mode: ContinuousDelivery
+mode: ContinuousDeployment
 
 branches:
-
   main:
     regex: ^main$
     label: ''
-    increment: Patch
-    track-merge-target: true
-  
+    increment: Minor
+    tracks-release-branches: false
+    is-release-branch: false
+
   develop:
     regex: ^develop$
-    label: '-dev'
-    increment: Minor
-    track-merge-target: true
-  
-  feature:
-    regex: ^features?/.*$
-    increment: Minor
-  
-  bugfix:
-    regex: ^(bugfix|hotfix)/.*$
-    label: 'fix-{BranchName}'
+    label: alpha
     increment: Patch
-  
+
+  feature:
+    regex: ^(features?|feature)/.*
+    label: useBranchName
+    increment: Patch
+
   release:
     regex: ^releases?/.*$
-    label: '-rc'
+    label: rc
     increment: Patch
-    track-merge-target: true
-  
-  support:
-    regex: ^support/
-    label: 'support-{BranchName}'
-    increment: Patch
-    track-merge-target: true
-  
-  pull-request:
-    regex: ^refs/pull/
-    label: '-pr'
-    increment: Patch
-    track-merge-target: true
+    is-release-branch: true
 
-  unknown:
-    label: '{BranchName}'
-    increment: Minor
+  hotfix:
+    regex: ^hotfix(es)?/.*$
+    label: beta
+    increment: Patch
+
+  support:
+    regex: ^support/.*$
+    label: support
+
+  pull-request:
+    regex: ^(pull|pr)/.*$
+    label: pr
+    increment: Patch
+    source-branches:
+      - main
+      - develop
+
+ignore:
+  sha: []
