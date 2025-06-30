@@ -17,7 +17,7 @@ type Generator[T any] struct {
 	disposed  bool
 }
 
-// Create a new generator.
+// Generate gets a new enumerator using a generator func
 func Generate[T any](next func() (T, bool, error)) Enumerator[T] {
 	return &Generator[T]{onNext: next}
 }

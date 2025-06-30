@@ -48,7 +48,7 @@ func (e *filterMapper[TIn, TOut]) Dispose() {
 	e.base.Dispose()
 }
 
-// Map creates a mapped enumerator
+// FilterMap creates a mapped enumerator
 func FilterMap[TIn any, TOut any](enumerator Enumerator[TIn], apply func(TIn) (TOut, bool, error)) Enumerator[TOut] {
 	return &filterMapper[TIn, TOut]{
 		base:  enumerator,

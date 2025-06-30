@@ -57,7 +57,7 @@ func TestInterleave_OverlappingKeys(t *testing.T) {
 
 // TestInterleave_SingleEnumerator tests interleaving with a single enumerator.
 func TestInterleave_SingleEnumerator(t *testing.T) {
-	enumerator := enumerators.Slice[int]([]int{1, 2, 3})
+	enumerator := enumerators.Slice([]int{1, 2, 3})
 
 	interleaved := enumerators.Interleave([]enumerators.Enumerator[int]{
 		enumerator,

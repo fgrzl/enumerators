@@ -6,7 +6,7 @@ retract v0.1.0--dev.18 // bad version, do not use
 
 require (
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
 )
 
 require (

@@ -40,7 +40,7 @@ func (e *filterEnumerator[T]) Dispose() {
 	e.base.Dispose()
 }
 
-// filter creates a mapped enumerator
+// Filter creates a mapped enumerator
 func Filter[T any](parent Enumerator[T], filter func(T) bool) Enumerator[T] {
 	return &filterEnumerator[T]{
 		base:   parent,
