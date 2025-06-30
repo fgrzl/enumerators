@@ -40,7 +40,7 @@ func (e *skipIfEnumerator[T]) Dispose() {
 	e.base.Dispose()
 }
 
-// skips the item if the contition is true
+// SkipIf skips the item if the contition is true
 func SkipIf[T any](enumerator Enumerator[T], condition func(T) bool) Enumerator[T] {
 	return &skipIfEnumerator[T]{
 		base:      enumerator,

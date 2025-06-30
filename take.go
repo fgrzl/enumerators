@@ -40,7 +40,7 @@ func (e *takeEnumerator[T]) Dispose() {
 	e.base.Dispose()
 }
 
-// take the item if the contition is true
+// Take takes the specified number of items
 func Take[T any](enumerator Enumerator[T], take int) Enumerator[T] {
 	return &takeEnumerator[T]{
 		base: enumerator,

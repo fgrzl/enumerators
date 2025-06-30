@@ -1,6 +1,6 @@
 package enumerators
 
-// NewPeekableEnumerator constructs a PeekableEnumerator
+// Peekable constructs a PeekableEnumerator
 func Peekable[T any](inner Enumerator[T]) *PeekableEnumerator[T] {
 	return &PeekableEnumerator[T]{
 		inner: inner,

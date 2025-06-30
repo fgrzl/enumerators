@@ -40,7 +40,7 @@ func (e *takeWhileEnumerator[T]) Dispose() {
 	e.base.Dispose()
 }
 
-// take the item if the contition is true
+// TakeWhile takes the item if the contition is true
 func TakeWhile[T any](enumerator Enumerator[T], condition func(T) bool) Enumerator[T] {
 	return &takeWhileEnumerator[T]{
 		base:      enumerator,

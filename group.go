@@ -181,7 +181,7 @@ func Group[T any, G comparable](
 
 }
 
-// Collect gathers all chunks into a slice of slices
+// CollectGroupingSlices gathers all chunks into a slice of slices
 func CollectGroupingSlices[T any, G comparable](enumerator Enumerator[*Grouping[T, G]]) (groupSlices []*GroupingSlice[T, G], err error) {
 	defer enumerator.Dispose()
 	for enumerator.MoveNext() {
