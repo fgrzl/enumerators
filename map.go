@@ -63,11 +63,21 @@ func ToMap[T any, TKey comparable, TValue any](enumerator Enumerator[T], keyFn f
 
 	result := make(map[TKey]TValue)
 	for enumerator.MoveNext() {
-		item, err := enumerator.Current()
+		current, err := enumerator.Current()
 		if err != nil {
 			return nil, err
 		}
-		result[keyFn(item)] = valFn(item)
+		result[keyFn(current)] = valFn(current)
 	}
 	return result, nil
+}
+
+// ToMapWithKey iterates over the provided enumerator and builds a map using each item as the value.
+// The key for each entry is computed by applying keyFn(item).
+//
+// The enumerator is disposed automatically at the end of processing.
+//
+// Returns an error if iteration fails. If the enumerator is nil, returns nil, nil.
+func ToMapWithKey[TKey comparable, TValue any](enumerator Enumerator[TValue], keyFn func(TValue) TKey) (map[TKey]TValue, error) {
+	return ToMap(enumerator, keyFn, func(v TValue) TValue { return v })
 }
