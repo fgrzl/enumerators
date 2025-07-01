@@ -46,3 +46,28 @@ func Map[T any, U any](enumerator Enumerator[T], mapper func(T) (U, error)) Enum
 		mapper: mapper,
 	}
 }
+
+// ToMap iterates over the provided enumerator and builds a map by applying
+// the keyFn and valFn to each item. The resulting map uses the key from keyFn(item)
+// and the value from valFn(item). If the enumerator yields an error during iteration,
+// the function returns immediately with that error.
+//
+// The enumerator is disposed automatically at the end of processing.
+//
+// Returns an error if iteration fails. If the enumerator is nil, returns nil, nil.
+func ToMap[T any, TKey comparable, TValue any](enumerator Enumerator[T], keyFn func(T) TKey, valFn func(T) TValue) (map[TKey]TValue, error) {
+	if enumerator == nil {
+		return nil, nil
+	}
+	defer enumerator.Dispose()
+
+	result := make(map[TKey]TValue)
+	for enumerator.MoveNext() {
+		item, err := enumerator.Current()
+		if err != nil {
+			return nil, err
+		}
+		result[keyFn(item)] = valFn(item)
+	}
+	return result, nil
+}
