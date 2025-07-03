@@ -2,16 +2,19 @@ package enumerators
 
 import "errors"
 
-type KeyedItem[K comparable, V any] struct {
-	Key  K
-	Item V
+// KeyedChunk represents a chunk of items that share the same key.
+type KeyedChunk[K comparable, V any] struct {
+	Key   K
+	Chunk Enumerator[V]
 }
 
+// ChunkWhen groups items into chunks based on a stateful split function.
+// It emits KeyedChunk[K, V] where each chunk has a key and a stream of values.
 func ChunkWhen[V any, K comparable](
 	in Enumerator[V],
 	seed K,
 	split func(prev K, item V) (K, bool, error),
-) Enumerator[Enumerator[KeyedItem[K, V]]] {
+) Enumerator[KeyedChunk[K, V]] {
 	if in == nil {
 		return &chunkWhenEnumerator[V, K]{exhausted: true}
 	}
@@ -32,20 +35,12 @@ type chunkWhenEnumerator[V any, K comparable] struct {
 	exhausted    bool
 }
 
-func (e *chunkWhenEnumerator[V, K]) Dispose() {
-	if e.currentChunk != nil {
-		e.currentChunk.Dispose()
-	}
-	if e.base != nil {
-		e.base.Dispose()
-	}
-}
-
 func (e *chunkWhenEnumerator[V, K]) MoveNext() bool {
 	if e.exhausted {
 		return false
 	}
 
+	// Drain current chunk
 	if e.currentChunk != nil && !e.currentChunk.exhausted {
 		for e.currentChunk.MoveNext() {
 		}
@@ -88,36 +83,27 @@ func (e *chunkWhenEnumerator[V, K]) MoveNext() bool {
 	return true
 }
 
-func (e *chunkWhenEnumerator[V, K]) Current() (Enumerator[KeyedItem[K, V]], error) {
+func (e *chunkWhenEnumerator[V, K]) Current() (KeyedChunk[K, V], error) {
 	if e.currentChunk == nil {
-		return nil, errors.New("no current chunk")
+		return KeyedChunk[K, V]{}, errors.New("no current chunk")
 	}
-	return &keyedChunkEnumerator[V, K]{inner: e.currentChunk}, nil
+	return KeyedChunk[K, V]{
+		Key:   e.currentChunk.key,
+		Chunk: e.currentChunk,
+	}, nil
 }
 
 func (e *chunkWhenEnumerator[V, K]) Err() error {
 	return e.err
 }
 
-type keyedChunkEnumerator[V any, K comparable] struct {
-	inner *innerChunkWhenEnumerator[V, K]
-}
-
-func (e *keyedChunkEnumerator[V, K]) MoveNext() bool {
-	return e.inner.MoveNext()
-}
-
-func (e *keyedChunkEnumerator[V, K]) Current() (KeyedItem[K, V], error) {
-	v, err := e.inner.Current()
-	return KeyedItem[K, V]{Key: e.inner.key, Item: v}, err
-}
-
-func (e *keyedChunkEnumerator[V, K]) Err() error {
-	return e.inner.Err()
-}
-
-func (e *keyedChunkEnumerator[V, K]) Dispose() {
-	e.inner.Dispose()
+func (e *chunkWhenEnumerator[V, K]) Dispose() {
+	if e.currentChunk != nil {
+		e.currentChunk.Dispose()
+	}
+	if e.base != nil {
+		e.base.Dispose()
+	}
 }
 
 type innerChunkWhenEnumerator[V any, K comparable] struct {

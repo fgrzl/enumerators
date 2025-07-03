@@ -20,7 +20,7 @@ func TestChunkByKey_GroupsByPrefix(t *testing.T) {
 		return string(s[0]) // group by first letter
 	})
 
-	var grouped [][]string
+	var result [][]string
 
 	// Act
 	for chunks.MoveNext() {
@@ -28,12 +28,12 @@ func TestChunkByKey_GroupsByPrefix(t *testing.T) {
 		require.NoError(t, err)
 
 		var group []string
-		for chunk.MoveNext() {
-			item, err := chunk.Current()
+		for chunk.Chunk.MoveNext() {
+			item, err := chunk.Chunk.Current()
 			require.NoError(t, err)
-			group = append(group, item.Item) // extract from KeyedItem
+			group = append(group, item)
 		}
-		grouped = append(grouped, group)
+		result = append(result, group)
 	}
 
 	// Assert
@@ -42,5 +42,5 @@ func TestChunkByKey_GroupsByPrefix(t *testing.T) {
 		{"banana", "blueberry"},
 		{"cherry"},
 		{"date", "dragonfruit"},
-	}, grouped)
+	}, result)
 }
