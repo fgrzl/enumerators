@@ -31,7 +31,7 @@ func TestChunkByKey_GroupsByPrefix(t *testing.T) {
 		for chunk.MoveNext() {
 			item, err := chunk.Current()
 			require.NoError(t, err)
-			group = append(group, item)
+			group = append(group, item.Item) // extract from KeyedItem
 		}
 		grouped = append(grouped, group)
 	}

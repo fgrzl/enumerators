@@ -1,15 +1,17 @@
 package enumerators
 
-func ChunkByKey[T any, TCompare comparable](
+func ChunkByKey[T any, K comparable](
 	in Enumerator[T],
-	keyFunc func(T) TCompare,
-) Enumerator[Enumerator[T]] {
-	return ChunkWhen(in, nil, func(prev *TCompare, item T) (*TCompare, bool, error) {
+	keyFunc func(T) K,
+) Enumerator[Enumerator[KeyedItem[K, T]]] {
+	var last K
+	first := true
+	return ChunkWhen(in, last, func(prev K, item T) (K, bool, error) {
 		curr := keyFunc(item)
-		if prev == nil {
-			return &curr, false, nil
+		if first {
+			first = false
+			return curr, false, nil // first group starts without split
 		}
-		split := *prev != curr
-		return &curr, split, nil
+		return curr, curr != prev, nil
 	})
 }

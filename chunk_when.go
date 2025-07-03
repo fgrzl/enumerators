@@ -2,32 +2,37 @@ package enumerators
 
 import "errors"
 
-func ChunkWhen[T any, TCompare comparable](
-	in Enumerator[T],
-	seed TCompare,
-	split func(val TCompare, item T) (TCompare, bool, error),
-) Enumerator[Enumerator[T]] {
+type KeyedItem[K comparable, V any] struct {
+	Key  K
+	Item V
+}
+
+func ChunkWhen[V any, K comparable](
+	in Enumerator[V],
+	seed K,
+	split func(prev K, item V) (K, bool, error),
+) Enumerator[Enumerator[KeyedItem[K, V]]] {
 	if in == nil {
-		return &chunkWhenEnumerator[T, TCompare]{exhausted: true}
+		return &chunkWhenEnumerator[V, K]{exhausted: true}
 	}
-	return &chunkWhenEnumerator[T, TCompare]{
-		base: in,
-		prev: seed,
-		when: split,
+	return &chunkWhenEnumerator[V, K]{
+		base:  in,
+		prev:  seed,
+		split: split,
 	}
 }
 
-type chunkWhenEnumerator[T any, TVal any] struct {
-	base         Enumerator[T]
-	currentChunk *innerChunkDiffEnumerator[T, TVal]
-	when         func(val TVal, item T) (TVal, bool, error)
-	prev         TVal
-	pending      *T
+type chunkWhenEnumerator[V any, K comparable] struct {
+	base         Enumerator[V]
+	currentChunk *innerChunkWhenEnumerator[V, K]
+	split        func(prev K, item V) (K, bool, error)
+	prev         K
+	pending      *V
 	err          error
 	exhausted    bool
 }
 
-func (e *chunkWhenEnumerator[T, TVal]) Dispose() {
+func (e *chunkWhenEnumerator[V, K]) Dispose() {
 	if e.currentChunk != nil {
 		e.currentChunk.Dispose()
 	}
@@ -36,7 +41,7 @@ func (e *chunkWhenEnumerator[T, TVal]) Dispose() {
 	}
 }
 
-func (e *chunkWhenEnumerator[T, TVal]) MoveNext() bool {
+func (e *chunkWhenEnumerator[V, K]) MoveNext() bool {
 	if e.exhausted {
 		return false
 	}
@@ -51,7 +56,7 @@ func (e *chunkWhenEnumerator[T, TVal]) MoveNext() bool {
 		}
 	}
 
-	var first T
+	var first V
 	var err error
 
 	if e.pending != nil {
@@ -71,44 +76,66 @@ func (e *chunkWhenEnumerator[T, TVal]) MoveNext() bool {
 		}
 	}
 
-	e.currentChunk = &innerChunkDiffEnumerator[T, TVal]{
+	e.currentChunk = &innerChunkWhenEnumerator[V, K]{
 		base:       e.base,
 		first:      first,
-		when:       e.when,
+		split:      e.split,
 		state:      e.prev,
-		setPending: func(v T) { e.pending = &v },
-		setState:   func(v TVal) { e.prev = v },
+		setPending: func(v V) { e.pending = &v },
+		setState:   func(v K) { e.prev = v },
+		key:        e.prev,
 	}
 	return true
 }
 
-func (e *chunkWhenEnumerator[T, TVal]) Current() (Enumerator[T], error) {
+func (e *chunkWhenEnumerator[V, K]) Current() (Enumerator[KeyedItem[K, V]], error) {
 	if e.currentChunk == nil {
 		return nil, errors.New("no current chunk")
 	}
-	return e.currentChunk, e.currentChunk.err
+	return &keyedChunkEnumerator[V, K]{inner: e.currentChunk}, nil
 }
 
-func (e *chunkWhenEnumerator[T, TVal]) Err() error {
+func (e *chunkWhenEnumerator[V, K]) Err() error {
 	return e.err
 }
 
-// --- Inner chunk enumerator ---
-
-type innerChunkDiffEnumerator[T any, TVal any] struct {
-	base       Enumerator[T]
-	when       func(TVal, T) (TVal, bool, error)
-	first      T
-	state      TVal
-	setState   func(TVal)
-	setPending func(T)
-	current    T
-	started    bool
-	exhausted  bool
-	err        error
+type keyedChunkEnumerator[V any, K comparable] struct {
+	inner *innerChunkWhenEnumerator[V, K]
 }
 
-func (e *innerChunkDiffEnumerator[T, TVal]) MoveNext() bool {
+func (e *keyedChunkEnumerator[V, K]) MoveNext() bool {
+	return e.inner.MoveNext()
+}
+
+func (e *keyedChunkEnumerator[V, K]) Current() (KeyedItem[K, V], error) {
+	v, err := e.inner.Current()
+	return KeyedItem[K, V]{Key: e.inner.key, Item: v}, err
+}
+
+func (e *keyedChunkEnumerator[V, K]) Err() error {
+	return e.inner.Err()
+}
+
+func (e *keyedChunkEnumerator[V, K]) Dispose() {
+	e.inner.Dispose()
+}
+
+type innerChunkWhenEnumerator[V any, K comparable] struct {
+	base       Enumerator[V]
+	split      func(K, V) (K, bool, error)
+	first      V
+	state      K
+	setState   func(K)
+	setPending func(V)
+	key        K
+
+	current   V
+	started   bool
+	exhausted bool
+	err       error
+}
+
+func (e *innerChunkWhenEnumerator[V, K]) MoveNext() bool {
 	if e.exhausted {
 		return false
 	}
@@ -132,7 +159,7 @@ func (e *innerChunkDiffEnumerator[T, TVal]) MoveNext() bool {
 		return false
 	}
 
-	newState, split, err := e.when(e.state, item)
+	newState, split, err := e.split(e.state, item)
 	if err != nil {
 		e.exhausted = true
 		e.err = err
@@ -141,12 +168,8 @@ func (e *innerChunkDiffEnumerator[T, TVal]) MoveNext() bool {
 
 	if split {
 		e.exhausted = true
-		if e.setState != nil {
-			e.setState(newState)
-		}
-		if e.setPending != nil {
-			e.setPending(item)
-		}
+		e.setState(newState)
+		e.setPending(item)
 		return false
 	}
 
@@ -155,12 +178,12 @@ func (e *innerChunkDiffEnumerator[T, TVal]) MoveNext() bool {
 	return true
 }
 
-func (e *innerChunkDiffEnumerator[T, TVal]) Current() (T, error) {
+func (e *innerChunkWhenEnumerator[V, K]) Current() (V, error) {
 	return e.current, e.err
 }
 
-func (e *innerChunkDiffEnumerator[T, TVal]) Err() error {
+func (e *innerChunkWhenEnumerator[V, K]) Err() error {
 	return e.err
 }
 
-func (e *innerChunkDiffEnumerator[T, TVal]) Dispose() {}
+func (e *innerChunkWhenEnumerator[V, K]) Dispose() {}
