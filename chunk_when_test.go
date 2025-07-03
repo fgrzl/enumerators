@@ -11,11 +11,10 @@ func TestChunkWhen_SplitsOnEven(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 3, 4, 5, 6, 7, 2, 9})
 
-	isEven := func(v int) (bool, error) {
-		return v%2 == 0, nil
-	}
-
-	chunks := ChunkWhen(input, isEven)
+	chunks := ChunkWhen(input, false, func(_ bool, item int) (bool, bool, error) {
+		// Split *before* even numbers
+		return item%2 == 0, item%2 == 0, nil
+	})
 
 	var result [][]int
 
