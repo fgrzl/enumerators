@@ -8,19 +8,17 @@ type KeyedChunk[K comparable, V any] struct {
 	Chunk Enumerator[V]
 }
 
-// ChunkWhen groups items into chunks based on a stateful split function.
+// ChunkWhen groups items into chunks based on a split function.
 // It emits KeyedChunk[K, V] where each chunk has a key and a stream of values.
 func ChunkWhen[V any, K comparable](
 	in Enumerator[V],
-	seed K,
-	split func(prev K, item V) (K, bool, error),
+	split func(item V) (K, bool, error),
 ) Enumerator[KeyedChunk[K, V]] {
 	if in == nil {
 		return &chunkWhenEnumerator[V, K]{exhausted: true}
 	}
 	return &chunkWhenEnumerator[V, K]{
 		base:  in,
-		prev:  seed,
 		split: split,
 	}
 }
@@ -28,8 +26,7 @@ func ChunkWhen[V any, K comparable](
 type chunkWhenEnumerator[V any, K comparable] struct {
 	base         Enumerator[V]
 	currentChunk *innerChunkWhenEnumerator[V, K]
-	split        func(prev K, item V) (K, bool, error)
-	prev         K
+	split        func(item V) (K, bool, error)
 	pending      *V
 	err          error
 	exhausted    bool
@@ -71,14 +68,19 @@ func (e *chunkWhenEnumerator[V, K]) MoveNext() bool {
 		}
 	}
 
+	key, _, err := e.split(first)
+	if err != nil {
+		e.err = err
+		e.exhausted = true
+		return false
+	}
+
 	e.currentChunk = &innerChunkWhenEnumerator[V, K]{
 		base:       e.base,
 		first:      first,
 		split:      e.split,
-		state:      e.prev,
+		key:        key,
 		setPending: func(v V) { e.pending = &v },
-		setState:   func(v K) { e.prev = v },
-		key:        e.prev,
 	}
 	return true
 }
@@ -108,12 +110,10 @@ func (e *chunkWhenEnumerator[V, K]) Dispose() {
 
 type innerChunkWhenEnumerator[V any, K comparable] struct {
 	base       Enumerator[V]
-	split      func(K, V) (K, bool, error)
+	split      func(item V) (K, bool, error)
 	first      V
-	state      K
-	setState   func(K)
-	setPending func(V)
 	key        K
+	setPending func(V)
 
 	current   V
 	started   bool
@@ -145,7 +145,7 @@ func (e *innerChunkWhenEnumerator[V, K]) MoveNext() bool {
 		return false
 	}
 
-	newState, split, err := e.split(e.state, item)
+	key, split, err := e.split(item)
 	if err != nil {
 		e.exhausted = true
 		e.err = err
@@ -154,13 +154,12 @@ func (e *innerChunkWhenEnumerator[V, K]) MoveNext() bool {
 
 	if split {
 		e.exhausted = true
-		e.setState(newState)
 		e.setPending(item)
 		return false
 	}
 
-	e.state = newState
 	e.current = item
+	e.key = key
 	return true
 }
 

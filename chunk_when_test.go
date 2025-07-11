@@ -11,7 +11,7 @@ func TestChunkWhen_SplitsOnEven(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 3, 4, 5, 6, 7, 2, 9})
 
-	chunks := ChunkWhen(input, false, func(_ bool, item int) (bool, bool, error) {
+	chunks := ChunkWhen(input, func(item int) (bool, bool, error) {
 		// Start a new chunk *before* even numbers
 		split := item%2 == 0
 		return split, split, nil

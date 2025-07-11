@@ -7,7 +7,7 @@ func ChunkByKey[V any, K comparable](
 	keyFunc func(V) K,
 ) Enumerator[KeyedChunk[K, V]] {
 	var last *K
-	return ChunkWhen(in, *new(K), func(prev K, item V) (K, bool, error) {
+	return ChunkWhen(in, func(item V) (K, bool, error) {
 		curr := keyFunc(item)
 		if last == nil {
 			last = &curr
