@@ -5,27 +5,62 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
     commit-message:
-      prefix: "chore"
+      prefix: "deps"
+      prefix-development: "deps"
       include: "scope"
     labels:
       - "dependencies"
       - "go"
+      - "automated"
+    groups:
+      # Group Go ecosystem updates together
+      go-ecosystem:
+        patterns:
+          - "golang.org/x/*"
+          - "go.uber.org/*"
+      # Group testing dependencies
+      testing:
+        patterns:
+          - "github.com/stretchr/testify"
+          - "*test*"
+          - "*mock*"
     ignore:
+      # Ignore major version updates for core Go tools to maintain stability
       - dependency-name: "golang.org/x/tools"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "golang.org/x/sys"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "golang.org/x/net"
         update-types: ["version-update:semver-major"]
 
   # Keep GitHub Actions up to date
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore"
+      prefix: "ci"
       include: "scope"
     labels:
       - "dependencies"
       - "github-actions"
-    open-pull-requests-limit: 5
+      - "ci/cd"
+      - "automated"
+    groups:
+      # Group GitHub Actions updates
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "*setup*"
+        exclude-patterns:
+          - "actions/checkout"  # Keep checkout separate for careful review
