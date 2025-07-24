@@ -1,5 +1,6 @@
 package enumerators
 
+// rangeEnumerator generates a sequence of values using a factory function.
 type rangeEnumerator[T any] struct {
 	start   int
 	end     int
@@ -24,14 +25,18 @@ func (e *rangeEnumerator[T]) Current() (T, error) {
 	return e.current, e.err
 }
 
+// Err returns any error encountered during enumeration.
 func (e *rangeEnumerator[T]) Err() error {
 	return e.err
 }
 
+// Dispose cleans up resources. For rangeEnumerator, this is a no-op.
 func (e *rangeEnumerator[T]) Dispose() {
 	// no-op
 }
 
+// Range creates an enumerator that generates a sequence of values using a factory function.
+// It starts at 'seed' and generates 'count' values by calling factory(i) for i from seed to seed+count-1.
 func Range[T any](seed int, count int, factory func(i int) T) Enumerator[T] {
 	return &rangeEnumerator[T]{
 		start:   seed,

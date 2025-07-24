@@ -1,5 +1,6 @@
 package enumerators
 
+// mapEnumerator applies a transformation function to each element from the base enumerator.
 type mapEnumerator[T any, U any] struct {
 	base    Enumerator[T]
 	mapper  func(T) (U, error)
@@ -7,6 +8,8 @@ type mapEnumerator[T any, U any] struct {
 	err     error
 }
 
+// MoveNext advances to the next element and applies the transformation.
+// Returns true if more elements are available, false otherwise.
 func (e *mapEnumerator[T, U]) MoveNext() bool {
 	if !e.base.MoveNext() {
 		return false
@@ -27,19 +30,24 @@ func (e *mapEnumerator[T, U]) MoveNext() bool {
 	return true
 }
 
+// Current returns the transformed current element and any error encountered.
 func (e *mapEnumerator[T, U]) Current() (U, error) {
 	return e.current, e.err
 }
 
+// Err returns any error encountered during enumeration or transformation.
 func (e *mapEnumerator[T, U]) Err() error {
 	return e.err
 }
 
+// Dispose cleans up resources by disposing the underlying enumerator.
 func (e *mapEnumerator[T, U]) Dispose() {
 	e.base.Dispose()
 }
 
-// Map creates a mapped enumerator
+// Map creates an enumerator that applies a transformation function to each element.
+// The mapper function receives an element of type T and returns a transformed element of type U.
+// If the mapper function returns an error, enumeration stops and the error is propagated.
 func Map[T any, U any](enumerator Enumerator[T], mapper func(T) (U, error)) Enumerator[U] {
 	return &mapEnumerator[T, U]{
 		base:   enumerator,

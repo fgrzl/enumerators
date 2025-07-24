@@ -19,9 +19,8 @@ func TestTakeWhile_BasicTakeWhile(t *testing.T) {
 
 	// Assert
 	assert.NoError(t, err)
-	// NOTE: Current implementation has a bug - it continues instead of stopping
-	// when condition fails. It should return []int{1, 2, 3} but returns all matching elements.
-	assert.Equal(t, []int{1, 2, 3, 1, 2}, result)
+	// Should stop at 4 and return only elements before it
+	assert.Equal(t, []int{1, 2, 3}, result)
 }
 
 func TestTakeWhile_EmptyInput(t *testing.T) {
@@ -102,12 +101,7 @@ func TestTakeWhile_StepByStep(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 6, current)
 
-	// NOTE: Due to bug in implementation, it continues past 7 to find 8
-	assert.True(t, taken.MoveNext())
-	current, err = taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 8, current)
-
+	// Should stop at 7 (odd number)
 	assert.False(t, taken.MoveNext())
 	assert.NoError(t, taken.Err())
 }
