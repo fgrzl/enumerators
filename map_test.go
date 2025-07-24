@@ -172,16 +172,17 @@ func TestToMap_DuplicateKeys(t *testing.T) {
 }
 
 func TestToMapWithKey_BasicUsage(t *testing.T) {
-	// Arrange
-	input := Slice([]string{"apple", "banana", "cherry"})
+	// Arrange - use strings with unique lengths to avoid conflicts
+	input := Slice([]string{"cat", "banana", "hi"})
 
 	// Act
 	result, err := ToMapWithKey(input, func(s string) int { return len(s) })
 
 	// Assert
 	assert.NoError(t, err)
-	assert.Len(t, result, 2) // lengths 5 and 6
-	assert.Equal(t, "apple", result[5])  // or "cherry", both have length 5
+	assert.Len(t, result, 3) // lengths 2, 3, and 6
+	assert.Equal(t, "hi", result[2])
+	assert.Equal(t, "cat", result[3])
 	assert.Equal(t, "banana", result[6])
 }
 
