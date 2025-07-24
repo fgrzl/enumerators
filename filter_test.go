@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFilter_BasicFiltering(t *testing.T) {
+func TestShouldReturnEvenNumbers_WhenFilteringByEven(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5, 6})
 	isEven := func(x int) bool { return x%2 == 0 }
@@ -22,7 +22,7 @@ func TestFilter_BasicFiltering(t *testing.T) {
 	assert.Equal(t, []int{2, 4, 6}, result)
 }
 
-func TestFilter_EmptyInput(t *testing.T) {
+func TestShouldReturnEmpty_WhenFilteringEmptyInput(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{})
 	alwaysTrue := func(x int) bool { return true }
@@ -36,7 +36,7 @@ func TestFilter_EmptyInput(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestFilter_NoMatches(t *testing.T) {
+func TestShouldReturnEmpty_WhenNoElementsMatchFilter(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 3, 5, 7})
 	isEven := func(x int) bool { return x%2 == 0 }
@@ -50,7 +50,7 @@ func TestFilter_NoMatches(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestFilter_AllMatch(t *testing.T) {
+func TestShouldReturnAllElements_WhenAllElementsMatchFilter(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{2, 4, 6, 8})
 	isEven := func(x int) bool { return x%2 == 0 }
