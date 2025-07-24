@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSlice_BasicIteration(t *testing.T) {
+func TestShouldIterateAllElements_WhenBasicSliceProvided(t *testing.T) {
 	// Arrange
 	input := []int{1, 2, 3, 4, 5}
 	enumerator := enumerators.Slice(input)
@@ -26,44 +26,51 @@ func TestSlice_BasicIteration(t *testing.T) {
 	assert.NoError(t, enumerator.Err())
 }
 
-func TestSlice_EmptySlice(t *testing.T) {
+func TestShouldReturnFalse_WhenSliceIsEmpty(t *testing.T) {
 	// Arrange
 	enumerator := enumerators.Slice([]int{})
 
-	// Act & Assert
-	assert.False(t, enumerator.MoveNext())
+	// Act
+	hasNext := enumerator.MoveNext()
+
+	// Assert
+	assert.False(t, hasNext)
 	assert.NoError(t, enumerator.Err())
 }
 
-func TestSlice_SingleElement(t *testing.T) {
+func TestShouldReturnSingleElement_WhenSliceHasOneItem(t *testing.T) {
 	// Arrange
 	enumerator := enumerators.Slice([]string{"hello"})
 
-	// Act & Assert
-	assert.True(t, enumerator.MoveNext())
+	// Act
+	hasFirst := enumerator.MoveNext()
 	current, err := enumerator.Current()
+	hasSecond := enumerator.MoveNext()
+
+	// Assert
+	assert.True(t, hasFirst)
 	require.NoError(t, err)
 	assert.Equal(t, "hello", current)
-	
-	assert.False(t, enumerator.MoveNext())
+	assert.False(t, hasSecond)
 	assert.NoError(t, enumerator.Err())
 }
 
-func TestSlice_Dispose(t *testing.T) {
+func TestShouldStillFunction_WhenDisposeCalled(t *testing.T) {
 	// Arrange
 	enumerator := enumerators.Slice([]int{1, 2, 3})
 
 	// Act
 	enumerator.Dispose() // Should not panic
+	hasNext := enumerator.MoveNext()
+	current, err := enumerator.Current()
 
 	// Assert - should still work after dispose
-	assert.True(t, enumerator.MoveNext())
-	current, err := enumerator.Current()
+	assert.True(t, hasNext)
 	require.NoError(t, err)
 	assert.Equal(t, 1, current)
 }
 
-func TestSlice_CurrentBeforeMoveNext(t *testing.T) {
+func TestShouldReturnZeroValue_WhenCurrentCalledBeforeMoveNext(t *testing.T) {
 	// Arrange
 	enumerator := enumerators.Slice([]int{1, 2, 3})
 
@@ -75,7 +82,7 @@ func TestSlice_CurrentBeforeMoveNext(t *testing.T) {
 	assert.Equal(t, 0, current) // zero value for int
 }
 
-func TestToSlice_WithSliceEnumerator(t *testing.T) {
+func TestShouldReturnOriginalSlice_WhenConvertingSliceEnumeratorToSlice(t *testing.T) {
 	// Arrange
 	original := []int{1, 2, 3, 4, 5}
 	enumerator := enumerators.Slice(original)
@@ -88,7 +95,7 @@ func TestToSlice_WithSliceEnumerator(t *testing.T) {
 	assert.Equal(t, original, result)
 }
 
-func TestToSlice_WithOtherEnumerator(t *testing.T) {
+func TestShouldReturnSliceOfResults_WhenConvertingRangeEnumeratorToSlice(t *testing.T) {
 	// Arrange - use a non-slice enumerator
 	enumerator := enumerators.Range(0, 3, func(i int) int { return i * 2 })
 
@@ -100,7 +107,7 @@ func TestToSlice_WithOtherEnumerator(t *testing.T) {
 	assert.Equal(t, []int{0, 2, 4}, result)
 }
 
-func TestToSlice_EmptyEnumerator(t *testing.T) {
+func TestShouldReturnEmptySlice_WhenConvertingEmptyEnumeratorToSlice(t *testing.T) {
 	// Arrange
 	enumerator := enumerators.Slice([]int{})
 

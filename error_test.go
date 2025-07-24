@@ -8,49 +8,50 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestError_ReturnsError(t *testing.T) {
+func TestShouldReturnProvidedError_WhenCreatedWithError(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("test error")
 	
 	// Act
 	errorEnum := enumerators.Error[int](expectedError)
+	hasMoved := errorEnum.MoveNext()
+	current, currentErr := errorEnum.Current()
 
 	// Assert
-	assert.False(t, errorEnum.MoveNext())
+	assert.False(t, hasMoved)
 	assert.Equal(t, expectedError, errorEnum.Err())
-	
-	current, err := errorEnum.Current()
 	assert.Equal(t, 0, current)      // zero value for int
-	assert.Equal(t, expectedError, err)
+	assert.Equal(t, expectedError, currentErr)
 }
 
-func TestError_NilError(t *testing.T) {
+func TestShouldNotHaveError_WhenCreatedWithNilError(t *testing.T) {
 	// Arrange & Act
 	errorEnum := enumerators.Error[string](nil)
+	hasMoved := errorEnum.MoveNext()
+	current, currentErr := errorEnum.Current()
 
 	// Assert
-	assert.False(t, errorEnum.MoveNext())
+	assert.False(t, hasMoved)
 	assert.NoError(t, errorEnum.Err())
-	
-	current, err := errorEnum.Current()
 	assert.Equal(t, "", current) // zero value for string
-	assert.NoError(t, err)
+	assert.NoError(t, currentErr)
 }
 
-func TestError_Dispose(t *testing.T) {
+func TestShouldMaintainBehavior_WhenDisposeCalledOnError(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("dispose test")
 	errorEnum := enumerators.Error[float64](expectedError)
 
 	// Act
 	errorEnum.Dispose() // Should not panic
+	hasMoved := errorEnum.MoveNext()
 
 	// Assert - behavior should be unchanged
-	assert.False(t, errorEnum.MoveNext())
+	assert.False(t, hasMoved)
 	assert.Equal(t, expectedError, errorEnum.Err())
 }
 
-func TestError_ToSlice(t *testing.T) {
+func TestShouldReturnError_WhenConvertingErrorEnumeratorToSlice(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("slice test")
 	errorEnum := enumerators.Error[int](expectedError)
@@ -64,7 +65,7 @@ func TestError_ToSlice(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestError_WithForEach(t *testing.T) {
+func TestShouldNotExecuteAction_WhenUsingErrorEnumeratorWithForEach(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("foreach test")
 	errorEnum := enumerators.Error[int](expectedError)
@@ -82,7 +83,7 @@ func TestError_WithForEach(t *testing.T) {
 	assert.Equal(t, 0, callCount) // Should not call the action since MoveNext() returns false
 }
 
-func TestError_WithChain(t *testing.T) {
+func TestShouldProceedToSecondEnumerator_WhenChainedWithNormalEnumerator(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("chain test")
 	errorEnum := enumerators.Error[int](expectedError)

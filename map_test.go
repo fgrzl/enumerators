@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestToMap(t *testing.T) {
+func TestShouldCreateMapFromStringLengths_WhenMappingStringsToLengths(t *testing.T) {
 	// Arrange
 	input := Slice([]string{"a", "bb", "ccc"})
 
@@ -29,7 +29,7 @@ func TestToMap(t *testing.T) {
 	assert.Equal(t, "ccc-x", result[3])
 }
 
-func TestMap_BasicTransformation(t *testing.T) {
+func TestShouldTransformAllElements_WhenMappingWithBasicFunction(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 2, 3, 4, 5})
 	doubler := func(x int) (int, error) { return x * 2, nil }
@@ -43,7 +43,7 @@ func TestMap_BasicTransformation(t *testing.T) {
 	assert.Equal(t, []int{2, 4, 6, 8, 10}, result)
 }
 
-func TestMap_EmptyInput(t *testing.T) {
+func TestShouldReturnEmpty_WhenMappingEmptyInput(t *testing.T) {
 	// Arrange
 	input := Slice([]int{})
 	transform := func(x int) (string, error) { return strconv.Itoa(x), nil }
@@ -57,7 +57,7 @@ func TestMap_EmptyInput(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestMap_TypeTransformation(t *testing.T) {
+func TestShouldChangeTypes_WhenMappingIntegersToStrings(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 2, 3})
 	toString := func(x int) (string, error) { return "num-" + strconv.Itoa(x), nil }
@@ -71,7 +71,7 @@ func TestMap_TypeTransformation(t *testing.T) {
 	assert.Equal(t, []string{"num-1", "num-2", "num-3"}, result)
 }
 
-func TestMap_TransformationError(t *testing.T) {
+func TestShouldStopAndReturnError_WhenTransformationFails(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 2, 3, 4, 5})
 	expectedError := errors.New("transformation error")
@@ -92,24 +92,33 @@ func TestMap_TransformationError(t *testing.T) {
 	assert.Equal(t, []int{10, 20}, result) // Should get results before error
 }
 
-func TestMap_StepByStep(t *testing.T) {
+func TestShouldProcessElementsSequentially_WhenIteratingStepByStep(t *testing.T) {
 	// Arrange
 	input := Slice([]string{"hello", "world"})
 	toUpper := func(s string) (string, error) { return strings.ToUpper(s), nil }
 	mapped := Map(input, toUpper)
 
-	// Act & Assert
-	assert.True(t, mapped.MoveNext())
-	current, err := mapped.Current()
-	require.NoError(t, err)
-	assert.Equal(t, "HELLO", current)
+	// Act - First element
+	hasFirst := mapped.MoveNext()
+	firstCurrent, firstErr := mapped.Current()
 
-	assert.True(t, mapped.MoveNext())
-	current, err = mapped.Current()
-	require.NoError(t, err)
-	assert.Equal(t, "WORLD", current)
+	// Act - Second element  
+	hasSecond := mapped.MoveNext()
+	secondCurrent, secondErr := mapped.Current()
 
-	assert.False(t, mapped.MoveNext())
+	// Act - No more elements
+	hasThird := mapped.MoveNext()
+
+	// Assert
+	assert.True(t, hasFirst)
+	require.NoError(t, firstErr)
+	assert.Equal(t, "HELLO", firstCurrent)
+
+	assert.True(t, hasSecond)
+	require.NoError(t, secondErr)
+	assert.Equal(t, "WORLD", secondCurrent)
+
+	assert.False(t, hasThird)
 	assert.NoError(t, mapped.Err())
 }
 
