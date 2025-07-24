@@ -6,12 +6,12 @@ import (
 )
 
 type ChannelEnumerator[T any] struct {
-	context     context.Context
-	dataCh      chan T
-	errCh       chan error
-	doneCh      chan struct{}
-	current     T
-	err         error
+	context      context.Context
+	dataCh       chan T
+	errCh        chan error
+	doneCh       chan struct{}
+	current      T
+	err          error
 	completeOnce sync.Once
 	disposeOnce  sync.Once
 }
@@ -58,6 +58,11 @@ func (e *ChannelEnumerator[T]) Dispose() {
 
 // Publish sends a value to the enumerator for consumption.
 func (e *ChannelEnumerator[T]) Publish(msg T) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			// Channel is closed, treat as publish failure
+		}
+	}()
 	select {
 	case <-e.context.Done():
 		return false // Context canceled
@@ -66,6 +71,7 @@ func (e *ChannelEnumerator[T]) Publish(msg T) bool {
 	case e.dataCh <- msg:
 		return true
 	}
+	return false
 }
 
 // Error signals an error to the enumerator.

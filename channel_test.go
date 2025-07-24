@@ -51,11 +51,9 @@ func TestChannel_PublishAfterComplete(t *testing.T) {
 
 	// Act
 	ch.Complete()
-	
-	// Assert - publishing after complete should panic (current implementation behavior)
-	assert.Panics(t, func() {
-		ch.Publish(1)
-	}, "Publishing after complete should panic")
+
+	// Assert - publishing after complete should fail gracefully (no panic)
+	assert.False(t, ch.Publish(1), "Publishing after complete should return false")
 }
 
 func TestChannel_PublishWithError(t *testing.T) {
@@ -95,7 +93,7 @@ func TestChannel_StepByStep(t *testing.T) {
 
 	// Publish second value
 	assert.True(t, ch.Publish("world"))
-	
+
 	assert.True(t, ch.MoveNext())
 	current, err = ch.Current()
 	require.NoError(t, err)
@@ -118,19 +116,19 @@ func TestChannel_ContextCancellation(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		ch.Publish(1) // This should succeed
 	}()
-	
+
 	// Move to consume the value
 	assert.True(t, ch.MoveNext())
 	value, err := ch.Current()
 	assert.NoError(t, err)
 	assert.Equal(t, 1, value)
-	
+
 	// Cancel context
 	cancel()
-	
+
 	// Give the context cancellation time to propagate
 	time.Sleep(20 * time.Millisecond)
-	
+
 	// Publishing after cancel should fail
 	canPublish := ch.Publish(2)
 
@@ -146,10 +144,10 @@ func TestChannel_ContextTimeout(t *testing.T) {
 
 	// Act - publish one value before timeout
 	assert.True(t, ch.Publish(1))
-	
+
 	// Wait for timeout to occur - use longer wait to ensure timeout happens
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Verify context is done
 	select {
 	case <-ctx.Done():
@@ -157,7 +155,7 @@ func TestChannel_ContextTimeout(t *testing.T) {
 	default:
 		t.Fatal("Context should be timed out")
 	}
-	
+
 	// Publishing after timeout should fail
 	canPublish := ch.Publish(2)
 
@@ -208,7 +206,7 @@ func TestChannel_DisposeAfterComplete(t *testing.T) {
 	ch.Complete()
 	ch.Dispose() // Should not panic
 
-	// Assert - publishing after dispose should fail gracefully 
+	// Assert - publishing after dispose should fail gracefully
 	assert.False(t, ch.Publish(1))
 }
 
