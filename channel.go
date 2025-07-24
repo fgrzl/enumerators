@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// ChannelEnumerator provides enumeration over channels with context support.
+// It supports publishing values, error handling, and graceful termination.
 type ChannelEnumerator[T any] struct {
 	context      context.Context
 	dataCh       chan T
@@ -94,7 +96,8 @@ func (e *ChannelEnumerator[T]) Complete() {
 	})
 }
 
-// Channel creates a new channel-based enumerator.
+// Channel creates a new channel-based enumerator with the specified buffer size.
+// The enumerator respects the provided context for cancellation.
 func Channel[T any](ctx context.Context, size int) *ChannelEnumerator[T] {
 	return &ChannelEnumerator[T]{
 		context: ctx,

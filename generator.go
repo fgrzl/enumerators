@@ -17,11 +17,14 @@ type Generator[T any] struct {
 	disposed  bool
 }
 
-// Generate gets a new enumerator using a generator func
+// Generate creates a new enumerator using a generator function.
+// The next function should return (value, hasNext, error) where hasNext indicates if more values are available.
 func Generate[T any](next func() (T, bool, error)) Enumerator[T] {
 	return &Generator[T]{onNext: next}
 }
 
+// GenerateAndDispose creates a new enumerator with both generator and disposal functions.
+// The dispose function is called when the enumerator is disposed to clean up resources.
 func GenerateAndDispose[T any](next func() (T, bool, error), dispose func()) Enumerator[T] {
 	return &Generator[T]{
 		onNext:    next,
@@ -66,11 +69,14 @@ func (ce *Generator[T]) Err() error {
 	return ce.err
 }
 
+// KeyValuePair represents a key-value pair for map enumeration.
 type KeyValuePair[K comparable, V any] struct {
 	Key   K
 	Value V
 }
 
+// GenerateFromMap creates an enumerator that yields key-value pairs from a map.
+// The order of enumeration is not guaranteed to be consistent across calls.
 func GenerateFromMap[K comparable, V any](m map[K]V) Enumerator[*KeyValuePair[K, V]] {
 	keys := make([]K, len(m))
 	i := 0
