@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldReturnProvidedError_WhenCreatedWithError(t *testing.T) {
+func TestShouldReturnProvidedErrorWhenCreatedWithError(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("test error")
 	
@@ -24,7 +24,7 @@ func TestShouldReturnProvidedError_WhenCreatedWithError(t *testing.T) {
 	assert.Equal(t, expectedError, currentErr)
 }
 
-func TestShouldNotHaveError_WhenCreatedWithNilError(t *testing.T) {
+func TestShouldNotHaveErrorWhenCreatedWithNilError(t *testing.T) {
 	// Arrange & Act
 	errorEnum := enumerators.Error[string](nil)
 	hasMoved := errorEnum.MoveNext()
@@ -37,7 +37,7 @@ func TestShouldNotHaveError_WhenCreatedWithNilError(t *testing.T) {
 	assert.NoError(t, currentErr)
 }
 
-func TestShouldMaintainBehavior_WhenDisposeCalledOnError(t *testing.T) {
+func TestShouldMaintainBehaviorWhenDisposeCalledOnError(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("dispose test")
 	errorEnum := enumerators.Error[float64](expectedError)
@@ -51,7 +51,7 @@ func TestShouldMaintainBehavior_WhenDisposeCalledOnError(t *testing.T) {
 	assert.Equal(t, expectedError, errorEnum.Err())
 }
 
-func TestShouldReturnError_WhenConvertingErrorEnumeratorToSlice(t *testing.T) {
+func TestShouldReturnErrorWhenConvertingErrorEnumeratorToSlice(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("slice test")
 	errorEnum := enumerators.Error[int](expectedError)
@@ -65,7 +65,7 @@ func TestShouldReturnError_WhenConvertingErrorEnumeratorToSlice(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestShouldNotExecuteAction_WhenUsingErrorEnumeratorWithForEach(t *testing.T) {
+func TestShouldNotExecuteActionWhenUsingErrorEnumeratorWithForEach(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("foreach test")
 	errorEnum := enumerators.Error[int](expectedError)
@@ -83,7 +83,7 @@ func TestShouldNotExecuteAction_WhenUsingErrorEnumeratorWithForEach(t *testing.T
 	assert.Equal(t, 0, callCount) // Should not call the action since MoveNext() returns false
 }
 
-func TestShouldProceedToSecondEnumerator_WhenChainedWithNormalEnumerator(t *testing.T) {
+func TestShouldProceedToSecondEnumeratorWhenChainedWithNormalEnumerator(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("chain test")
 	errorEnum := enumerators.Error[int](expectedError)

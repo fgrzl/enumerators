@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldGroupByTargetSum_WhenChunkingByWeight(t *testing.T) {
+func TestShouldGroupByTargetSumWhenChunkingByWeight(t *testing.T) {
 	// Arrange
 	source := enumerators.Slice([]int{1, 2, 3, 4, 5, 6})
 	weightFunc := func(item int) (int, error) { return item, nil }
@@ -29,7 +29,7 @@ func TestShouldGroupByTargetSum_WhenChunkingByWeight(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestShouldReturnEmptyResult_WhenChunkingEmptyInput(t *testing.T) {
+func TestShouldReturnEmptyResultWhenChunkingEmptyInput(t *testing.T) {
 	// Arrange
 	source := enumerators.Slice([]int{})
 	weightFunc := func(item int) (int, error) { return item, nil }

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestShouldCreateMapFromStringLengths_WhenMappingStringsToLengths(t *testing.T) {
+func TestShouldCreateMapFromStringLengthsWhenMappingStringsToLengths(t *testing.T) {
 	// Arrange
 	input := Slice([]string{"a", "bb", "ccc"})
 
@@ -29,7 +29,7 @@ func TestShouldCreateMapFromStringLengths_WhenMappingStringsToLengths(t *testing
 	assert.Equal(t, "ccc-x", result[3])
 }
 
-func TestShouldTransformAllElements_WhenMappingWithBasicFunction(t *testing.T) {
+func TestShouldTransformAllElementsWhenMappingWithBasicFunction(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 2, 3, 4, 5})
 	doubler := func(x int) (int, error) { return x * 2, nil }
@@ -43,7 +43,7 @@ func TestShouldTransformAllElements_WhenMappingWithBasicFunction(t *testing.T) {
 	assert.Equal(t, []int{2, 4, 6, 8, 10}, result)
 }
 
-func TestShouldReturnEmpty_WhenMappingEmptyInput(t *testing.T) {
+func TestShouldReturnEmptyWhenMappingEmptyInput(t *testing.T) {
 	// Arrange
 	input := Slice([]int{})
 	transform := func(x int) (string, error) { return strconv.Itoa(x), nil }
@@ -57,7 +57,7 @@ func TestShouldReturnEmpty_WhenMappingEmptyInput(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestShouldChangeTypes_WhenMappingIntegersToStrings(t *testing.T) {
+func TestShouldChangeTypesWhenMappingIntegersToStrings(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 2, 3})
 	toString := func(x int) (string, error) { return "num-" + strconv.Itoa(x), nil }
@@ -71,7 +71,7 @@ func TestShouldChangeTypes_WhenMappingIntegersToStrings(t *testing.T) {
 	assert.Equal(t, []string{"num-1", "num-2", "num-3"}, result)
 }
 
-func TestShouldStopAndReturnError_WhenTransformationFails(t *testing.T) {
+func TestShouldStopAndReturnErrorWhenTransformationFails(t *testing.T) {
 	// Arrange
 	input := Slice([]int{1, 2, 3, 4, 5})
 	expectedError := errors.New("transformation error")
@@ -92,7 +92,7 @@ func TestShouldStopAndReturnError_WhenTransformationFails(t *testing.T) {
 	assert.Equal(t, []int{10, 20}, result) // Should get results before error
 }
 
-func TestShouldProcessElementsSequentially_WhenIteratingStepByStep(t *testing.T) {
+func TestShouldProcessElementsSequentiallyWhenIteratingStepByStep(t *testing.T) {
 	// Arrange
 	input := Slice([]string{"hello", "world"})
 	toUpper := func(s string) (string, error) { return strings.ToUpper(s), nil }

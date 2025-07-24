@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestShouldReturnFirstNElements_WhenTakingFromSlice(t *testing.T) {
+func TestShouldReturnFirstNElementsWhenTakingFromSlice(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -21,7 +21,7 @@ func TestShouldReturnFirstNElements_WhenTakingFromSlice(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, result)
 }
 
-func TestShouldReturnEmpty_WhenTakeCountIsZero(t *testing.T) {
+func TestShouldReturnEmptyWhenTakeCountIsZero(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -34,7 +34,7 @@ func TestShouldReturnEmpty_WhenTakeCountIsZero(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestShouldReturnAllElements_WhenTakeCountExceedsAvailable(t *testing.T) {
+func TestShouldReturnAllElementsWhenTakeCountExceedsAvailable(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3})
 
@@ -47,7 +47,7 @@ func TestShouldReturnAllElements_WhenTakeCountExceedsAvailable(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, result)
 }
 
-func TestShouldReturnEmpty_WhenInputIsEmpty(t *testing.T) {
+func TestShouldReturnEmptyWhenInputIsEmpty(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{})
 
@@ -60,7 +60,7 @@ func TestShouldReturnEmpty_WhenInputIsEmpty(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestShouldReturnEmpty_WhenTakeCountIsNegative(t *testing.T) {
+func TestShouldReturnEmptyWhenTakeCountIsNegative(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -73,7 +73,7 @@ func TestShouldReturnEmpty_WhenTakeCountIsNegative(t *testing.T) {
 	assert.Empty(t, result) // negative count should result in empty
 }
 
-func TestShouldStopAfterSpecifiedCount_WhenIteratingStepByStep(t *testing.T) {
+func TestShouldStopAfterSpecifiedCountWhenIteratingStepByStep(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]string{"a", "b", "c", "d", "e"})
 	taken := enumerators.Take(input, 3)
@@ -110,7 +110,7 @@ func TestShouldStopAfterSpecifiedCount_WhenIteratingStepByStep(t *testing.T) {
 	assert.NoError(t, taken.Err())
 }
 
-func TestShouldReturnSingleElement_WhenTakingOneFromSingleElementSlice(t *testing.T) {
+func TestShouldReturnSingleElementWhenTakingOneFromSingleElementSlice(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{42})
 
@@ -123,7 +123,7 @@ func TestShouldReturnSingleElement_WhenTakingOneFromSingleElementSlice(t *testin
 	assert.Equal(t, []int{42}, result)
 }
 
-func TestShouldStillFunction_WhenDisposeCalledOnTake(t *testing.T) {
+func TestShouldStillFunctionWhenDisposeCalledOnTake(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3})
 	taken := enumerators.Take(input, 2)

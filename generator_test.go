@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestShouldGenerateKeyValuePairs_WhenCreatingFromMap(t *testing.T) {
+func TestShouldGenerateKeyValuePairsWhenCreatingFromMap(t *testing.T) {
 	// Arrange
 	m := map[string]int{
 		"one":   1,

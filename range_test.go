@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestShouldGenerateSequence_WhenCreatingBasicRange(t *testing.T) {
+func TestShouldGenerateSequenceWhenCreatingBasicRange(t *testing.T) {
 	// Arrange 
 	generator := func(i int) int { return i * 2 }
 
@@ -21,7 +21,7 @@ func TestShouldGenerateSequence_WhenCreatingBasicRange(t *testing.T) {
 	assert.Equal(t, []int{0, 2, 4, 6, 8}, result)
 }
 
-func TestShouldReturnEmpty_WhenRangeCountIsZero(t *testing.T) {
+func TestShouldReturnEmptyWhenRangeCountIsZero(t *testing.T) {
 	// Arrange
 	generator := func(i int) int { return i }
 
@@ -34,7 +34,7 @@ func TestShouldReturnEmpty_WhenRangeCountIsZero(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestShouldGenerateOneItem_WhenRangeCountIsOne(t *testing.T) {
+func TestShouldGenerateOneItemWhenRangeCountIsOne(t *testing.T) {
 	// Arrange
 	generator := func(i int) string { return "item-" + string(rune('0'+i)) }
 
@@ -47,7 +47,7 @@ func TestShouldGenerateOneItem_WhenRangeCountIsOne(t *testing.T) {
 	assert.Equal(t, []string{"item-5"}, result)
 }
 
-func TestShouldReturnEmpty_WhenRangeCountIsNegative(t *testing.T) {
+func TestShouldReturnEmptyWhenRangeCountIsNegative(t *testing.T) {
 	// Arrange 
 	generator := func(i int) int { return i }
 
