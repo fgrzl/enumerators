@@ -1,5 +1,6 @@
 package enumerators
 
+// filterMapper applies a transformation and filtering function to each element from the base enumerator.
 type filterMapper[TIn any, TOut any] struct {
 	base    Enumerator[TIn]
 	apply   func(TIn) (TOut, bool, error)
@@ -7,6 +8,7 @@ type filterMapper[TIn any, TOut any] struct {
 	err     error
 }
 
+// MoveNext advances to the next element that is both transformed and accepted by the filter.
 func (e *filterMapper[TIn, TOut]) MoveNext() bool {
 	for {
 		if !e.base.MoveNext() {
@@ -36,19 +38,24 @@ func (e *filterMapper[TIn, TOut]) MoveNext() bool {
 	}
 }
 
+// Current returns the transformed current element and any error encountered.
 func (e *filterMapper[TIn, TOut]) Current() (TOut, error) {
 	return e.current, e.err
 }
 
+// Err returns any error encountered during enumeration or transformation.
 func (e *filterMapper[TIn, TOut]) Err() error {
 	return e.err
 }
 
+// Dispose cleans up resources by disposing the underlying enumerator.
 func (e *filterMapper[TIn, TOut]) Dispose() {
 	e.base.Dispose()
 }
 
-// FilterMap creates a mapped enumerator
+// FilterMap creates an enumerator that applies both transformation and filtering in a single pass.
+// The apply function receives an element and returns (transformedValue, shouldInclude, error).
+// Only elements where shouldInclude is true are yielded after transformation.
 func FilterMap[TIn any, TOut any](enumerator Enumerator[TIn], apply func(TIn) (TOut, bool, error)) Enumerator[TOut] {
 	return &filterMapper[TIn, TOut]{
 		base:  enumerator,

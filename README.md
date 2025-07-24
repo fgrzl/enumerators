@@ -21,13 +21,22 @@ This library defines a generic `Enumerator[T]` interface with concrete implement
 
 ## Interface
 
+All enumerators implement the `Enumerator[T]` interface and extend the `Disposable` interface:
+
 ```go
 type Enumerator[T any] interface {
+  Disposable
   MoveNext() bool
   Current() (T, error)
   Err() error
 }
+
+type Disposable interface {
+  Dispose()
+}
 ```
+
+**Important**: All enumerators must be disposed when no longer needed to ensure proper resource cleanup. Most functions in this library automatically dispose enumerators for you, but when manually iterating, always call `Dispose()` or use `defer` to ensure cleanup.
 
 ## Built-in Enumerators
 
@@ -36,11 +45,13 @@ type Enumerator[T any] interface {
 Iterates over a Go slice.
 
 ```go
-e := enumerators.NewSliceEnumerator([]int{1, 2, 3})
+e := enumerators.Slice([]int{1, 2, 3})
+defer e.Dispose() // Ensure cleanup
 for e.MoveNext() {
   v, _ := e.Current()
   fmt.Println(v)
 }
+```
 ```
 
 ### ChannelEnumerator
@@ -55,10 +66,46 @@ go func() {
   close(ch)
 }()
 
-e := enumerators.NewChannelEnumerator(ch)
+e := enumerators.Channel(context.Background(), 0)
+defer e.Dispose() // Ensure cleanup
 for e.MoveNext() {
   v, _ := e.Current()
   fmt.Println(v)
 }
+```
+
+## Automatic Disposal
+
+Many functions in this library automatically dispose enumerators for you:
+
+```go
+// ToSlice automatically disposes the enumerator
+slice, err := enumerators.ToSlice(enumerators.Slice([]int{1, 2, 3}))
+
+// ForEach automatically disposes the enumerator
+err := enumerators.ForEach(enumerators.Slice([]string{"a", "b"}), func(s string) error {
+  fmt.Println(s)
+  return nil
+})
+
+// Consume automatically disposes the enumerator
+err := enumerators.Consume(enumerators.Slice([]int{1, 2, 3}))
+```
+
+## Chaining Operations
+
+Enumerators can be chained together for complex data processing:
+
+```go
+result, err := enumerators.ToSlice(
+  enumerators.Map(
+    enumerators.Filter(
+      enumerators.Slice([]int{1, 2, 3, 4, 5}),
+      func(x int) bool { return x%2 == 0 }, // Keep even numbers
+    ),
+    func(x int) (string, error) { return fmt.Sprintf("num_%d", x), nil }, // Convert to string
+  ),
+)
+// result: []string{"num_2", "num_4"}
 ```
 

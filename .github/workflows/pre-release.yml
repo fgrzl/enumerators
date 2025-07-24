@@ -14,27 +14,47 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      # Checkout the full repository history for version calculation
       - name: Checkout Full History
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # Set up Go environment for testing
+      - name: Set Up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.0
+
+      # Verify repository state before releasing
+      - name: Verify Repository State
+        run: |
+          go mod tidy
+          go mod download
+          go build ./...
+          go test ./...
+
+      # Install GitVersion for semantic versioning
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v4.0.1
 
+      # Calculate the next semantic version based on commit history
       - name: Calculate Version
         id: version
         uses: gittools/actions/gitversion/execute@v4.0.1
 
+      # Create and push a git tag with the calculated version
       - name: Tag Commit
         uses: fgrzl/actions/tag-commit@v0.0.3
         with:
           tag: ${{ steps.version.outputs.semVer }}
 
+      # Notify Go proxy to make the new version available
       - name: Notify Go Proxy
         uses: fgrzl/actions/notify-go-proxy@v0.0.3
         with:
           tag: ${{ steps.version.outputs.semVer }}
 
+      # Clean up old pre-release tags to keep repository tidy
       - name: Prune Pre-release Tags
         uses: fgrzl/actions/prune-tags@v0.0.3
