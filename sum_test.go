@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSum_IntSum(t *testing.T) {
+func TestShouldCalculateTotalWhenSummingIntegers(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -19,7 +19,7 @@ func TestSum_IntSum(t *testing.T) {
 	assert.Equal(t, 15, result)
 }
 
-func TestSum_EmptyEnumerator(t *testing.T) {
+func TestShouldReturnZeroWhenSummingEmptyEnumerator(t *testing.T) {
 	// Arrange
 	input := enumerators.Empty[int]()
 
@@ -31,7 +31,7 @@ func TestSum_EmptyEnumerator(t *testing.T) {
 	assert.Equal(t, 0, result) // zero value for int
 }
 
-func TestSum_SingleElement(t *testing.T) {
+func TestShouldApplyTransformWhenSummingSingleElement(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{42})
 

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTake_BasicTake(t *testing.T) {
+func TestShouldReturnFirstNElementsWhenTakingFromSlice(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -21,7 +21,7 @@ func TestTake_BasicTake(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, result)
 }
 
-func TestTake_TakeZero(t *testing.T) {
+func TestShouldReturnEmptyWhenTakeCountIsZero(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -34,7 +34,7 @@ func TestTake_TakeZero(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestTake_TakeMoreThanAvailable(t *testing.T) {
+func TestShouldReturnAllElementsWhenTakeCountExceedsAvailable(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3})
 
@@ -47,7 +47,7 @@ func TestTake_TakeMoreThanAvailable(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, result)
 }
 
-func TestTake_EmptyInput(t *testing.T) {
+func TestShouldReturnEmptyWhenInputIsEmpty(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{})
 
@@ -60,7 +60,7 @@ func TestTake_EmptyInput(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestTake_NegativeCount(t *testing.T) {
+func TestShouldReturnEmptyWhenTakeCountIsNegative(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 
@@ -73,32 +73,44 @@ func TestTake_NegativeCount(t *testing.T) {
 	assert.Empty(t, result) // negative count should result in empty
 }
 
-func TestTake_StepByStep(t *testing.T) {
+func TestShouldStopAfterSpecifiedCountWhenIteratingStepByStep(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]string{"a", "b", "c", "d", "e"})
 	taken := enumerators.Take(input, 3)
 
-	// Act & Assert
-	assert.True(t, taken.MoveNext())
-	current, err := taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, "a", current)
+	// Act - First element
+	hasFirst := taken.MoveNext()
+	firstCurrent, firstErr := taken.Current()
+	
+	// Act - Second element
+	hasSecond := taken.MoveNext()
+	secondCurrent, secondErr := taken.Current()
 
-	assert.True(t, taken.MoveNext())
-	current, err = taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, "b", current)
+	// Act - Third element
+	hasThird := taken.MoveNext()
+	thirdCurrent, thirdErr := taken.Current()
 
-	assert.True(t, taken.MoveNext())
-	current, err = taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, "c", current)
+	// Act - Should stop after 3 items
+	hasFourth := taken.MoveNext()
 
-	assert.False(t, taken.MoveNext()) // Should stop after 3 items
+	// Assert
+	assert.True(t, hasFirst)
+	require.NoError(t, firstErr)
+	assert.Equal(t, "a", firstCurrent)
+
+	assert.True(t, hasSecond)
+	require.NoError(t, secondErr)
+	assert.Equal(t, "b", secondCurrent)
+
+	assert.True(t, hasThird)
+	require.NoError(t, thirdErr)
+	assert.Equal(t, "c", thirdCurrent)
+
+	assert.False(t, hasFourth) // Should stop after 3 items
 	assert.NoError(t, taken.Err())
 }
 
-func TestTake_SingleElement(t *testing.T) {
+func TestShouldReturnSingleElementWhenTakingOneFromSingleElementSlice(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{42})
 
@@ -111,17 +123,18 @@ func TestTake_SingleElement(t *testing.T) {
 	assert.Equal(t, []int{42}, result)
 }
 
-func TestTake_Dispose(t *testing.T) {
+func TestShouldStillFunctionWhenDisposeCalledOnTake(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3})
 	taken := enumerators.Take(input, 2)
 
 	// Act
 	taken.Dispose() // Should not panic
+	hasNext := taken.MoveNext()
+	current, err := taken.Current()
 
 	// Assert - should still work
-	assert.True(t, taken.MoveNext())
-	current, err := taken.Current()
+	assert.True(t, hasNext)
 	require.NoError(t, err)
 	assert.Equal(t, 1, current)
 }

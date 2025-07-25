@@ -8,9 +8,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRange_BasicRange(t *testing.T) {
-	// Arrange & Act
-	rangeEnum := enumerators.Range(0, 5, func(i int) int { return i * 2 })
+func TestShouldGenerateSequenceWhenCreatingBasicRange(t *testing.T) {
+	// Arrange 
+	generator := func(i int) int { return i * 2 }
+
+	// Act
+	rangeEnum := enumerators.Range(0, 5, generator)
 	result, err := enumerators.ToSlice(rangeEnum)
 
 	// Assert
@@ -18,9 +21,12 @@ func TestRange_BasicRange(t *testing.T) {
 	assert.Equal(t, []int{0, 2, 4, 6, 8}, result)
 }
 
-func TestRange_EmptyRange(t *testing.T) {
-	// Arrange & Act
-	rangeEnum := enumerators.Range(0, 0, func(i int) int { return i })
+func TestShouldReturnEmptyWhenRangeCountIsZero(t *testing.T) {
+	// Arrange
+	generator := func(i int) int { return i }
+
+	// Act
+	rangeEnum := enumerators.Range(0, 0, generator)
 	result, err := enumerators.ToSlice(rangeEnum)
 
 	// Assert
@@ -28,9 +34,12 @@ func TestRange_EmptyRange(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestRange_SingleElement(t *testing.T) {
-	// Arrange & Act
-	rangeEnum := enumerators.Range(5, 1, func(i int) string { return "item-" + string(rune('0'+i)) })
+func TestShouldGenerateOneItemWhenRangeCountIsOne(t *testing.T) {
+	// Arrange
+	generator := func(i int) string { return "item-" + string(rune('0'+i)) }
+
+	// Act
+	rangeEnum := enumerators.Range(5, 1, generator)
 	result, err := enumerators.ToSlice(rangeEnum)
 
 	// Assert
@@ -38,9 +47,12 @@ func TestRange_SingleElement(t *testing.T) {
 	assert.Equal(t, []string{"item-5"}, result)
 }
 
-func TestRange_NegativeCount(t *testing.T) {
-	// Arrange & Act - negative count should produce empty result
-	rangeEnum := enumerators.Range(0, -5, func(i int) int { return i })
+func TestShouldReturnEmptyWhenRangeCountIsNegative(t *testing.T) {
+	// Arrange 
+	generator := func(i int) int { return i }
+
+	// Act - negative count should produce empty result
+	rangeEnum := enumerators.Range(0, -5, generator)
 	result, err := enumerators.ToSlice(rangeEnum)
 
 	// Assert
