@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestChunk(t *testing.T) {
-
+func TestShouldGroupByTargetSumWhenChunkingByWeight(t *testing.T) {
 	// Arrange
 	source := enumerators.Slice([]int{1, 2, 3, 4, 5, 6})
-	chunks := enumerators.Chunk(source, 5, func(item int) (int, error) { return item, nil })
+	weightFunc := func(item int) (int, error) { return item, nil }
 
 	// Act
+	chunks := enumerators.Chunk(source, 5, weightFunc)
 	result, err := enumerators.Collect(chunks)
 
 	// Assert
@@ -26,19 +26,19 @@ func TestChunk(t *testing.T) {
 		{5},    // 5 (exactly hits target 5)
 		{6},    // 6 (new chunk)
 	}
-
 	assert.Equal(t, expected, result)
 }
 
-func TestChunk_EmptyInput(t *testing.T) {
+func TestShouldReturnEmptyResultWhenChunkingEmptyInput(t *testing.T) {
 	// Arrange
 	source := enumerators.Slice([]int{})
-	chunks := enumerators.Chunk(source, 5, func(item int) (int, error) { return item, nil })
+	weightFunc := func(item int) (int, error) { return item, nil }
+
 	// Act
+	chunks := enumerators.Chunk(source, 5, weightFunc)
 	result, err := enumerators.Collect(chunks)
 
 	// Assert
-
 	assert.Nil(t, err)
 	assert.EqualValues(t, 0, len(result))
 }
