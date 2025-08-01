@@ -22,25 +22,32 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      # Check out the repository source code for building and testing
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Set up Go environment with the specified version for consistency
       - name: Set Up Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.24.0
 
+      # Ensure go.mod and go.sum are synchronized and clean
       - name: Install Dependencies
         run: go mod tidy
 
+      # Download all Go module dependencies to cache them
       - name: Download Dependencies
         run: go mod download
 
+      # Compile all Go packages to verify no build errors
       - name: Build Project
         run: go build ./...
 
+      # Execute all tests with verbose output and generate coverage report
       - name: Run Tests
         run: go test ./... -v -coverprofile=coverage.out
 
+      # Clean up workflow artifacts and temporary files
       - name: Workflow Cleanup
         uses: fgrzl/actions/workflow-cleanup@v0.0.3

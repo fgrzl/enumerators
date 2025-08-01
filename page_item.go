@@ -1,9 +1,11 @@
 package enumerators
 
 import (
-	"fmt"
+	"errors"
 )
 
+// PageItemEnumerator creates an enumerator that handles paginated data by calling a fetch function.
+// The fetchPage function should return (items, hasMore, error) where hasMore indicates if additional pages exist.
 func PageItemEnumerator[T any](fetchPage func() ([]T, bool, error)) Enumerator[T] {
 	return &pageItemEnumerator[T]{fetchPage: fetchPage}
 }
@@ -43,7 +45,7 @@ func (e *pageItemEnumerator[T]) MoveNext() bool {
 func (e *pageItemEnumerator[T]) Current() (T, error) {
 	if e.index >= len(e.items) {
 		var zero T
-		return zero, fmt.Errorf("no current item")
+		return zero, errors.New("no current item")
 	}
 	return e.items[e.index], nil
 }
