@@ -1,6 +1,7 @@
 package enumerators
 
-// Peekable constructs a PeekableEnumerator
+// Peekable creates a peekable enumerator that allows looking ahead at the next element
+// without advancing the enumerator position.
 func Peekable[T any](inner Enumerator[T]) *PeekableEnumerator[T] {
 	return &PeekableEnumerator[T]{
 		inner: inner,
