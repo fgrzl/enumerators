@@ -36,12 +36,12 @@ jobs:
 
       # Install GitVersion for semantic versioning
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4.0.1
+        uses: gittools/actions/gitversion/setup@v4.1.0
 
       # Calculate the next semantic version based on commit history
       - name: Calculate Version
         id: version
-        uses: gittools/actions/gitversion/execute@v4.0.1
+        uses: gittools/actions/gitversion/execute@v4.1.0
 
       # Create and push a git tag with the calculated version
       - name: Tag Commit
