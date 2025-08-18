@@ -50,4 +50,4 @@ jobs:
 
       # Clean up workflow artifacts and temporary files
       - name: Workflow Cleanup
-        uses: fgrzl/actions/workflow-cleanup@v0.0.3
+        uses: fgrzl/actions/workflow-cleanup@v0.0.5

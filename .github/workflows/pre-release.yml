@@ -45,16 +45,16 @@ jobs:
 
       # Create and push a git tag with the calculated version
       - name: Tag Commit
-        uses: fgrzl/actions/tag-commit@v0.0.3
+        uses: fgrzl/actions/tag-commit@v0.0.5
         with:
           tag: ${{ steps.version.outputs.semVer }}
 
       # Notify Go proxy to make the new version available
       - name: Notify Go Proxy
-        uses: fgrzl/actions/notify-go-proxy@v0.0.3
+        uses: fgrzl/actions/notify-go-proxy@v0.0.5
         with:
           tag: ${{ steps.version.outputs.semVer }}
 
       # Clean up old pre-release tags to keep repository tidy
       - name: Prune Pre-release Tags
-        uses: fgrzl/actions/prune-tags@v0.0.3
+        uses: fgrzl/actions/prune-tags@v0.0.5
