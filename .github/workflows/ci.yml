@@ -24,7 +24,7 @@ jobs:
     steps:
       # Check out the repository source code for building and testing
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Set up Go environment with the specified version for consistency
       - name: Set Up Go

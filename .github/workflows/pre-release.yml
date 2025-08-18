@@ -16,7 +16,7 @@ jobs:
     steps:
       # Checkout the full repository history for version calculation
       - name: Checkout Full History
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
