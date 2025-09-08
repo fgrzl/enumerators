@@ -138,6 +138,9 @@ func (c *innerChunkEnumerator[T, TSize]) Err() error {
 	return c.err
 }
 
+// Chunk creates an enumerator that groups elements into chunks based on a target size.
+// The compute function determines the size contribution of each element.
+// Each chunk is yielded as a separate enumerator when the cumulative size reaches or exceeds the target.
 func Chunk[T any, TSize constraints.Ordered](
 	in Enumerator[T],
 	target TSize,
@@ -153,13 +156,16 @@ func Chunk[T any, TSize constraints.Ordered](
 	}
 }
 
+// ChunkByCount creates an enumerator that groups elements into chunks of a specified count.
+// Each chunk contains at most 'count' elements, with the final chunk potentially containing fewer.
 func ChunkByCount[T any](in Enumerator[T], count int) Enumerator[Enumerator[T]] {
 	return Chunk(in, count, func(item T) (int, error) {
 		return 1, nil
 	})
 }
 
-// Collect gathers all chunks into a slice of slices
+// Collect gathers all chunks from a chunked enumerator into a slice of slices.
+// The outer enumerator is automatically disposed after collection completes.
 func Collect[T any](enumerator Enumerator[Enumerator[T]]) ([][]T, error) {
 	var chunks [][]T
 	var err error

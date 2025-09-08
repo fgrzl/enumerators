@@ -30,17 +30,17 @@ jobs:
         with:
           go-version: 1.25.0
 
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Download dependencies
+      - name: Install Dependencies
         run: go mod tidy
 
-      - name: Vet Project
-        run: go vet ./...
+      - name: Download Dependencies
+        run: go mod download
+
+      - name: Build Project
+        run: go build ./...
 
       - name: Run Tests
-        run: go test ./... -v -cover
+        run: go test ./... -v -coverprofile=coverage.out
 
       - name: Workflow Cleanup
-        uses: fgrzl/actions/workflow-cleanup@v0.0.5
+        uses: fgrzl/actions/workflow-cleanup@v0.0.3

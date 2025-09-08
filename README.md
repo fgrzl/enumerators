@@ -56,18 +56,19 @@ for e.MoveNext() {
 
 ### ChannelEnumerator
 
-Iterates over a channel until it's closed.
+Iterates over values published to a channel-based enumerator.
 
 ```go
-ch := make(chan string)
+e := enumerators.Channel[string](context.Background(), 0)
+defer e.Dispose() // Ensure cleanup
+
+// Publish data in a separate goroutine
 go func() {
-  ch <- "hello"
-  ch <- "world"
-  close(ch)
+  e.Publish("hello")
+  e.Publish("world")
+  e.Complete() // Signal completion
 }()
 
-e := enumerators.Channel(context.Background(), 0)
-defer e.Dispose() // Ensure cleanup
 for e.MoveNext() {
   v, _ := e.Current()
   fmt.Println(v)

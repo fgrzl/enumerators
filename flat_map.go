@@ -1,6 +1,6 @@
 package enumerators
 
-import "fmt"
+import "errors"
 
 // flatMapEnumerator applies a function that returns an enumerator for each element,
 // then flattens the results into a single sequence.
@@ -43,7 +43,7 @@ func (e *flatMapEnumerator[T, U]) MoveNext() bool {
 func (e *flatMapEnumerator[T, U]) Current() (U, error) {
 	if e.current == nil {
 		var zero U
-		return zero, fmt.Errorf("no current item")
+		return zero, errors.New("no current item")
 	}
 	return e.current.Current()
 }
