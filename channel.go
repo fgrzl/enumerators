@@ -73,7 +73,6 @@ func (e *ChannelEnumerator[T]) Publish(msg T) bool {
 	case e.dataCh <- msg:
 		return true
 	}
-	return false
 }
 
 // Error signals an error to the enumerator.
