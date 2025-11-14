@@ -1,7 +1,6 @@
 package enumerators
 
 import (
-	"errors"
 	"sync"
 )
 
@@ -19,7 +18,12 @@ type Generator[T any] struct {
 
 // Generate creates a new enumerator using a generator function.
 // The next function should return (value, hasNext, error) where hasNext indicates if more values are available.
+// If error is not nil, hasNext should be false; otherwise, behavior is undefined.
+// If next is nil, Generate panics.
 func Generate[T any](next func() (T, bool, error)) Enumerator[T] {
+	if next == nil {
+		panic("next function cannot be nil")
+	}
 	return &Generator[T]{onNext: next}
 }
 
@@ -59,7 +63,7 @@ func (ce *Generator[T]) MoveNext() bool {
 func (ce *Generator[T]) Current() (T, error) {
 	if ce.disposed {
 		var zero T
-		return zero, errors.New("enumerator disposed")
+		return zero, ErrDisposed
 	}
 	return ce.current, ce.err
 }

@@ -34,3 +34,10 @@ func TestShouldGenerateKeyValuePairsWhenCreatingFromMap(t *testing.T) {
 	assert.ElementsMatch(t, expectedResults, results)
 	assert.NoError(t, enumerator.Err())
 }
+
+func TestShouldPanicWhenGenerateCalledWithNilNext(t *testing.T) {
+	// Arrange & Act & Assert
+	assert.Panics(t, func() {
+		enumerators.Generate[int](nil)
+	})
+}

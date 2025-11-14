@@ -145,3 +145,18 @@ func TestShouldPropagateErrorWhenChainedWithMap(t *testing.T) {
 	assert.Equal(t, assert.AnError, err)
 	assert.Equal(t, []int{2, 4}, result) // 1->2 (even), 2->4 (even), 3->error
 }
+
+func BenchmarkFilter(b *testing.B) {
+	input := make([]int, 1000)
+	for i := range input {
+		input[i] = i
+	}
+	enumerator := enumerators.Slice(input)
+	isEven := func(x int) bool { return x%2 == 0 }
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		filtered := enumerators.Filter(enumerator, isEven)
+		enumerators.Consume(filtered)
+	}
+}

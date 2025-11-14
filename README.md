@@ -110,3 +110,89 @@ result, err := enumerators.ToSlice(
 // result: []string{"num_2", "num_4"}
 ```
 
+## Performance Considerations
+
+### Memory Usage
+
+**Lazy Operations** (recommended for large datasets):
+- `Map`, `Filter`, `Take`, `Skip`, `FlatMap` - Process elements one by one, minimal memory usage
+
+**Eager Operations** (materialize entire sequence in memory):
+- `Sort`, `Reverse`, `Union`, `Intersect`, `Except`, `Sample` - Load all elements into memory
+- **Warning**: These operations can cause out-of-memory errors for large datasets. Consider processing in batches or using lazy alternatives.
+
+**Terminal Operations** (consume the enumerator):
+- `ToSlice`, `ToMap`, `Count`, `Sum`, `Min`, `Max`, `First`, `Last` - May load data into memory depending on input size
+
+### Error Handling
+
+Operations that expect at least one element (`First`, `Last`, `Single`, `Aggregate`) return `ErrEmptySequence` for empty enumerators. Operations that work with empty sequences (`Min`, `Max`, `Sum`) return zero values.
+
+## Available Operations
+
+### Transformation
+- `Map[T, U](enumerator, mapper)` - Transform each element
+- `FlatMap[T, U](enumerator, mapper)` - Transform and flatten
+- `Filter[T](enumerator, predicate)` - Keep elements matching predicate
+- `FilterMap[TIn, TOut](enumerator, apply)` - Filter and transform in one step
+- `Sort[T](enumerator, less)` - Sort elements
+- `Reverse[T](enumerator)` - Reverse element order
+
+### Selection
+- `Take[T](enumerator, n)` - Take first N elements
+- `TakeWhile[T](enumerator, condition)` - Take while condition holds
+- `Skip[T](enumerator, n)` - Skip first N elements
+- `SkipIf[T](enumerator, condition)` - Skip while condition holds
+- `Distinct[T](enumerator)` - Remove duplicates
+- `Sample[T](enumerator, n)` - Randomly sample N elements
+- `ElementAt[T](enumerator, index)` - Get element at index
+- `Single[T](enumerator)` - Get single element or error
+
+### Aggregation
+- `Sum[T, TSum](enumerator, selector)` - Sum elements
+- `Count[T](enumerator)` - Count elements
+- `Min[T](enumerator)` - Find minimum
+- `Max[T](enumerator)` - Find maximum
+- `First[T](enumerator)` - Get first element
+- `Last[T](enumerator)` - Get last element
+- `Any[T](enumerator, predicate)` - Check if any element matches
+- `All[T](enumerator, predicate)` - Check if all elements match
+- `Contains[T](enumerator, value)` - Check if contains value
+- `Aggregate[TSource, TAccumulate](enumerator, seed, accumulator)` - Custom accumulation
+
+### Comparison
+- `SequenceEqual[T](first, second)` - Compare two sequences for equality
+
+### Default Values
+- `DefaultIfEmpty[T](enumerator, defaultValue)` - Provide default value for empty sequences
+
+### Context-Aware Operations
+- `MapWithContext[T, U](ctx, enumerator, mapper)` - Transform with context cancellation
+- `FilterWithContext[T](ctx, enumerator, predicate)` - Filter with context cancellation
+
+### Grouping and Chunking
+- `Group[T, G](enumerator, keySelector)` - Group by key
+- `Chunk[T, TSize](enumerator, sizeSelector)` - Chunk by size
+- `ChunkByKey[V, K](in, keySelector)` - Chunk by key
+- `ChunkWhen[V, K](in, splitFunc)` - Chunk when condition
+- `Partition[T](enumerator, predicate)` - Partition into two slices
+
+### Combination
+- `Chain[T](enumerators...)` - Concatenate enumerators
+- `Interleave[T, TOrdered](enumerators, keySelector)` - Interleave by key
+- `Zip[T, U, V](left, right, zipper)` - Zip two enumerators
+- `Union[T](enumerators...)` - Union of enumerators
+- `Intersect[T](enumerators...)` - Intersection of enumerators
+- `Except[T](left, right)` - Set difference
+
+### Conversion
+- `ToSlice[T](enumerator)` - Convert to slice
+- `ToMap[T, K, V](enumerator, keyFn, valFn)` - Convert to map
+- `ToMapWithKey[K, V](enumerator, keyFn)` - Convert to map with identity values
+
+### Utilities
+- `ForEach[T](enumerator, action)` - Execute action for each element
+- `Consume[T](enumerator)` - Consume without processing
+- `Peekable[T](enumerator)` - Add peek functionality
+- `Cleanup[T](enumerator, cleanupFunc)` - Add cleanup function
+
