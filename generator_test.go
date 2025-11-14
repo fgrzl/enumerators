@@ -41,3 +41,36 @@ func TestShouldPanicWhenGenerateCalledWithNilNext(t *testing.T) {
 		enumerators.Generate[int](nil)
 	})
 }
+
+func FuzzGenerate(f *testing.F) {
+	f.Add(1, true, false)
+	f.Add(0, false, true)
+	f.Fuzz(func(t *testing.T, value int, hasNext bool, hasError bool) {
+		// If hasError, hasNext must be false per contract
+		if hasError {
+			hasNext = false
+		}
+		var err error
+		if hasError {
+			err = assert.AnError
+		}
+		index := 0
+		gen := enumerators.Generate(func() (int, bool, error) {
+			if index == 0 {
+				index++
+				return value, hasNext, err
+			}
+			return 0, false, nil
+		})
+		defer gen.Dispose()
+
+		if hasNext {
+			assert.True(t, gen.MoveNext())
+			curr, currErr := gen.Current()
+			assert.NoError(t, currErr)
+			assert.Equal(t, value, curr)
+		} else {
+			assert.False(t, gen.MoveNext())
+		}
+	})
+}

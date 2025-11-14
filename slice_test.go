@@ -180,3 +180,17 @@ func TestShouldConsumeRemainingElementsWhenPartiallyConsumed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []int{3, 4, 5}, result)
 }
+
+func FuzzToSlice(f *testing.F) {
+	f.Add([]byte{1, 2, 3})
+	f.Fuzz(func(t *testing.T, inputBytes []byte) {
+		input := make([]int, len(inputBytes))
+		for i, b := range inputBytes {
+			input[i] = int(b)
+		}
+		enumerator := enumerators.Slice(input)
+		result, err := enumerators.ToSlice(enumerator)
+		assert.NoError(t, err)
+		assert.Equal(t, input, result)
+	})
+}

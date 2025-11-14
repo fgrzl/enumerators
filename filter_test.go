@@ -160,3 +160,20 @@ func BenchmarkFilter(b *testing.B) {
 		enumerators.Consume(filtered)
 	}
 }
+
+func FuzzFilter(f *testing.F) {
+	f.Add([]byte{1, 2, 3}, 2)
+	f.Fuzz(func(t *testing.T, inputBytes []byte, threshold int) {
+		input := make([]int, len(inputBytes))
+		for i, b := range inputBytes {
+			input[i] = int(b)
+		}
+		enumerator := enumerators.Slice(input)
+		filtered := enumerators.Filter(enumerator, func(x int) bool { return x > threshold })
+		result, err := enumerators.ToSlice(filtered)
+		assert.NoError(t, err)
+		for _, v := range result {
+			assert.Greater(t, v, threshold)
+		}
+	})
+}

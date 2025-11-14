@@ -125,3 +125,19 @@ func TestShouldDisposeEnumeratorWhenSumCompletes(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, disposed, "Enumerator should be disposed after sum")
 }
+
+func BenchmarkSum(b *testing.B) {
+	input := make([]int, 1000)
+	for i := range input {
+		input[i] = i + 1
+	}
+	enumerator := enumerators.Slice(input)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result, err := enumerators.Sum(enumerator, func(x int) (int, error) { return x, nil })
+		if err != nil || result != 500500 {
+			b.Fatal("unexpected result")
+		}
+	}
+}

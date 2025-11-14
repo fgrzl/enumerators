@@ -240,3 +240,23 @@ func BenchmarkMap(b *testing.B) {
 		mapped.Dispose()
 	}
 }
+
+func FuzzMap(f *testing.F) {
+	f.Add([]byte{1, 2, 3}, 10)
+	f.Fuzz(func(t *testing.T, inputBytes []byte, multiplier int) {
+		input := make([]int, len(inputBytes))
+		for i, b := range inputBytes {
+			input[i] = int(b)
+		}
+		enumerator := Slice(input)
+		mapped := Map(enumerator, func(x int) (int, error) {
+			return x * multiplier, nil
+		})
+		result, err := ToSlice(mapped)
+		assert.NoError(t, err)
+		assert.Len(t, result, len(input))
+		for i, v := range result {
+			assert.Equal(t, input[i]*multiplier, v)
+		}
+	})
+}
