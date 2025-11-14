@@ -15,7 +15,7 @@ func TestEmpty_NoElements(t *testing.T) {
 	// Act & Assert
 	assert.False(t, enumerator.MoveNext())
 	assert.NoError(t, enumerator.Err())
-	
+
 	current, err := enumerator.Current()
 	assert.NoError(t, err)
 	assert.Equal(t, 0, current) // zero value for int
@@ -65,6 +65,20 @@ func TestConsume_EmptyEnumerator(t *testing.T) {
 
 	// Assert
 	assert.NoError(t, err)
+}
+
+func TestConsume_WithError(t *testing.T) {
+	// Arrange
+	enumerator := enumerators.Generate(func() (int, bool, error) {
+		return 0, false, assert.AnError
+	})
+
+	// Act
+	err := enumerators.Consume(enumerator)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, assert.AnError, err)
 }
 
 func TestCleanup_CallsCleanupFunction(t *testing.T) {
@@ -136,4 +150,18 @@ func TestCleanup_WithNilCleanupFunction(t *testing.T) {
 
 	// Assert - should still work
 	assert.True(t, wrapper.MoveNext())
+}
+
+func TestCleanup_MultipleDisposeCalls(t *testing.T) {
+	// Arrange
+	cleanupCalled := 0
+	base := enumerators.Slice([]int{1})
+	wrapper := enumerators.Cleanup(base, func() { cleanupCalled++ })
+
+	// Act
+	wrapper.Dispose()
+	wrapper.Dispose() // Should be safe
+
+	// Assert
+	assert.Equal(t, 1, cleanupCalled) // Cleanup should only be called once
 }

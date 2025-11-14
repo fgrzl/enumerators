@@ -12,6 +12,7 @@ type takeEnumerator[T any] struct {
 // MoveNext advances to the next element, up to the specified limit.
 func (e *takeEnumerator[T]) MoveNext() bool {
 	if !e.base.MoveNext() {
+		e.err = e.base.Err() // Propagate any error from base enumerator
 		return false
 	}
 

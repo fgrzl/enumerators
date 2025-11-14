@@ -44,12 +44,8 @@ func Slice[T any](slice []T) Enumerator[T] {
 
 // ToSlice converts an enumerator to a slice by consuming all its elements.
 // The enumerator is automatically disposed after consumption.
-// If the enumerator is already a SliceEnumerator, returns the underlying slice directly.
 func ToSlice[T any](enumerator Enumerator[T]) ([]T, error) {
 	defer enumerator.Dispose()
-	if sliceEnum, ok := enumerator.(*SliceEnumerator[T]); ok {
-		return sliceEnum.slice, nil
-	}
 
 	var slice []T
 	for enumerator.MoveNext() {

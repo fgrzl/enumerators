@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGroup(t *testing.T) {
+func TestShouldGroupElementsWhenSliceProvided(t *testing.T) {
 	// Arrange
 	source := enumerators.Slice([]int{1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5, 1, 1})
 	groupings := setupSourceAndGroupings(source)
@@ -20,7 +20,7 @@ func TestGroup(t *testing.T) {
 	assertGroupings(t, result, err)
 }
 
-func TestGroupOverChannel(t *testing.T) {
+func TestShouldGroupElementsWhenChannelProvided(t *testing.T) {
 	// Arrange
 	source := enumerators.Channel[int](context.Background(), 1)
 	groupings := setupSourceAndGroupings(source)
@@ -53,7 +53,7 @@ func TestGroupOverChannel(t *testing.T) {
 	assertGroupings(t, result, err)
 }
 
-func TestGroupOverEmptyClosedChannel(t *testing.T) {
+func TestShouldReturnEmptyGroupingsWhenEmptyChannelProvided(t *testing.T) {
 	// Arrange
 	source := enumerators.Channel[int](context.Background(), 1)
 	groupings := setupSourceAndGroupings(source)

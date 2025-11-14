@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTakeWhile_BasicTakeWhile(t *testing.T) {
+func TestShouldReturnElementsWhileConditionHoldsWhenInputProvided(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5, 1, 2})
 	lessThanFour := func(x int) bool { return x < 4 }
@@ -23,7 +23,7 @@ func TestTakeWhile_BasicTakeWhile(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, result)
 }
 
-func TestTakeWhile_EmptyInput(t *testing.T) {
+func TestShouldReturnEmptyWhenConditionHoldsForNoElements(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{})
 	alwaysTrue := func(x int) bool { return true }
@@ -37,7 +37,7 @@ func TestTakeWhile_EmptyInput(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func TestTakeWhile_NoMatches(t *testing.T) {
+func TestShouldReturnEmptyWhenConditionFailsForFirstElement(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{5, 6, 7, 8})
 	lessThanFive := func(x int) bool { return x < 5 }
@@ -51,7 +51,7 @@ func TestTakeWhile_NoMatches(t *testing.T) {
 	assert.Empty(t, result) // First element doesn't match, so none taken
 }
 
-func TestTakeWhile_AllMatch(t *testing.T) {
+func TestShouldReturnAllElementsWhenConditionHoldsForAll(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4})
 	lessThanTen := func(x int) bool { return x < 10 }
@@ -65,7 +65,7 @@ func TestTakeWhile_AllMatch(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3, 4}, result)
 }
 
-func TestTakeWhile_StringCondition(t *testing.T) {
+func TestShouldReturnElementsWhileConditionHoldsWhenStringConditionProvided(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]string{"a", "b", "c", "d", "A", "B"})
 	isLowercase := func(s string) bool { return len(s) == 1 && s[0] >= 'a' && s[0] <= 'z' }
@@ -79,7 +79,7 @@ func TestTakeWhile_StringCondition(t *testing.T) {
 	assert.Equal(t, []string{"a", "b", "c", "d"}, result) // Stops at first uppercase
 }
 
-func TestTakeWhile_StepByStep(t *testing.T) {
+func TestShouldAllowStepByStepIterationWhenConditionHolds(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{2, 4, 6, 7, 8})
 	isEven := func(x int) bool { return x%2 == 0 }
@@ -106,7 +106,7 @@ func TestTakeWhile_StepByStep(t *testing.T) {
 	assert.NoError(t, taken.Err())
 }
 
-func TestTakeWhile_SingleElement(t *testing.T) {
+func TestShouldReturnSingleElementWhenConditionHoldsForOneElement(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{5})
 	alwaysTrue := func(x int) bool { return true }
@@ -120,7 +120,7 @@ func TestTakeWhile_SingleElement(t *testing.T) {
 	assert.Equal(t, []int{5}, result)
 }
 
-func TestTakeWhile_Dispose(t *testing.T) {
+func TestShouldAllowDisposeWhenTakeWhileUsed(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3})
 	alwaysTrue := func(x int) bool { return true }

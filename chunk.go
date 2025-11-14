@@ -33,6 +33,7 @@ func (e *chunkEnumerator[T, TSize]) MoveNext() bool {
 	if e.currentChunk == nil {
 		if !e.base.MoveNext() {
 			e.exhausted = true
+			e.err = e.base.Err() // Propagate error from base
 			return false
 		}
 		e.currentChunk = &innerChunkEnumerator[T, TSize]{

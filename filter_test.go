@@ -67,7 +67,7 @@ func TestShouldReturnAllElementsWhenAllElementsMatchFilter(t *testing.T) {
 func TestFilter_StringFiltering(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]string{"apple", "banana", "cherry", "date"})
-	hasA := func(s string) bool { 
+	hasA := func(s string) bool {
 		for _, r := range s {
 			if r == 'a' {
 				return true
@@ -122,4 +122,26 @@ func TestFilter_Dispose(t *testing.T) {
 
 	// Assert - should still work (slice enumerator doesn't care about dispose)
 	assert.True(t, filtered.MoveNext())
+}
+
+func TestShouldPropagateErrorWhenChainedWithMap(t *testing.T) {
+	// Arrange
+	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
+	mapper := func(x int) (int, error) {
+		if x == 3 {
+			return 0, assert.AnError
+		}
+		return x * 2, nil
+	}
+	isEven := func(x int) bool { return x%2 == 0 }
+
+	// Act
+	mapped := enumerators.Map(input, mapper)
+	filtered := enumerators.Filter(mapped, isEven)
+	result, err := enumerators.ToSlice(filtered)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, assert.AnError, err)
+	assert.Equal(t, []int{2, 4}, result) // 1->2 (even), 2->4 (even), 3->error
 }

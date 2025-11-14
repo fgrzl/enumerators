@@ -43,7 +43,7 @@ func TestShouldApplyTransformWhenSummingSingleElement(t *testing.T) {
 	assert.Equal(t, 84, result)
 }
 
-func TestSum_FloatSum(t *testing.T) {
+func TestShouldSumFloatsWhenFloatSliceProvided(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]float64{1.1, 2.2, 3.3})
 
@@ -55,7 +55,7 @@ func TestSum_FloatSum(t *testing.T) {
 	assert.InDelta(t, 6.6, result, 0.0001)
 }
 
-func TestSum_StringLength(t *testing.T) {
+func TestShouldSumStringLengthsWhenStringSliceProvided(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]string{"hello", "world", "test"})
 
@@ -67,7 +67,7 @@ func TestSum_StringLength(t *testing.T) {
 	assert.Equal(t, 14, result) // 5 + 5 + 4
 }
 
-func TestSum_WithTransformation(t *testing.T) {
+func TestShouldApplyTransformationWhenSummingSquares(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4})
 
@@ -79,7 +79,7 @@ func TestSum_WithTransformation(t *testing.T) {
 	assert.Equal(t, 30, result) // 1 + 4 + 9 + 16
 }
 
-func TestSum_SelectorError(t *testing.T) {
+func TestShouldReturnErrorWhenSelectorFails(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3})
 	selectorError := assert.AnError
@@ -98,7 +98,7 @@ func TestSum_SelectorError(t *testing.T) {
 	assert.Equal(t, 0, result) // zero value when error occurs
 }
 
-func TestSum_NegativeNumbers(t *testing.T) {
+func TestShouldSumNegativeNumbersWhenNegativeValuesProvided(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]int{-1, -2, -3, 4, 5})
 
@@ -110,7 +110,7 @@ func TestSum_NegativeNumbers(t *testing.T) {
 	assert.Equal(t, 3, result) // -1 + -2 + -3 + 4 + 5 = 3
 }
 
-func TestSum_DisposesEnumerator(t *testing.T) {
+func TestShouldDisposeEnumeratorWhenSumCompletes(t *testing.T) {
 	// Arrange
 	disposed := false
 	input := enumerators.Cleanup(
