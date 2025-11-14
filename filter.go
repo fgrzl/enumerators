@@ -13,6 +13,7 @@ type filterEnumerator[T any] struct {
 func (e *filterEnumerator[T]) MoveNext() bool {
 	for {
 		if !e.base.MoveNext() {
+			e.err = e.base.Err() // Propagate any error from base enumerator
 			return false
 		}
 

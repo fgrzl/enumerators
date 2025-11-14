@@ -67,7 +67,7 @@ func TestShouldReturnAllElementsWhenAllElementsMatchFilter(t *testing.T) {
 func TestFilter_StringFiltering(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([]string{"apple", "banana", "cherry", "date"})
-	hasA := func(s string) bool { 
+	hasA := func(s string) bool {
 		for _, r := range s {
 			if r == 'a' {
 				return true
@@ -122,4 +122,58 @@ func TestFilter_Dispose(t *testing.T) {
 
 	// Assert - should still work (slice enumerator doesn't care about dispose)
 	assert.True(t, filtered.MoveNext())
+}
+
+func TestShouldPropagateErrorWhenChainedWithMap(t *testing.T) {
+	// Arrange
+	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
+	mapper := func(x int) (int, error) {
+		if x == 3 {
+			return 0, assert.AnError
+		}
+		return x * 2, nil
+	}
+	isEven := func(x int) bool { return x%2 == 0 }
+
+	// Act
+	mapped := enumerators.Map(input, mapper)
+	filtered := enumerators.Filter(mapped, isEven)
+	result, err := enumerators.ToSlice(filtered)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, assert.AnError, err)
+	assert.Equal(t, []int{2, 4}, result) // 1->2 (even), 2->4 (even), 3->error
+}
+
+func BenchmarkFilter(b *testing.B) {
+	input := make([]int, 1000)
+	for i := range input {
+		input[i] = i
+	}
+	enumerator := enumerators.Slice(input)
+	isEven := func(x int) bool { return x%2 == 0 }
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		filtered := enumerators.Filter(enumerator, isEven)
+		enumerators.Consume(filtered)
+	}
+}
+
+func FuzzFilter(f *testing.F) {
+	f.Add([]byte{1, 2, 3}, 2)
+	f.Fuzz(func(t *testing.T, inputBytes []byte, threshold int) {
+		input := make([]int, len(inputBytes))
+		for i, b := range inputBytes {
+			input[i] = int(b)
+		}
+		enumerator := enumerators.Slice(input)
+		filtered := enumerators.Filter(enumerator, func(x int) bool { return x > threshold })
+		result, err := enumerators.ToSlice(filtered)
+		assert.NoError(t, err)
+		for _, v := range result {
+			assert.Greater(t, v, threshold)
+		}
+	})
 }

@@ -25,6 +25,8 @@ func (e *ChannelEnumerator[T]) MoveNext() bool {
 		select {
 		case <-e.doneCh:
 			return false
+		case <-e.context.Done():
+			return false
 		case err, ok := <-e.errCh:
 			if ok {
 				e.err = err

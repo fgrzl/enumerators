@@ -4,11 +4,13 @@ import (
 	"errors"
 )
 
+// Grouping represents a group of elements with a common key.
 type Grouping[T any, G comparable] struct {
 	Enumerator *innerGroupEnumerator[T, G]
 	Key        G
 }
 
+// GroupingSlice represents a slice of elements grouped by a key.
 type GroupingSlice[T any, G comparable] struct {
 	Items []T
 	Group G

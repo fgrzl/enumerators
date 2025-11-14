@@ -2,6 +2,15 @@
 // mapping, and cleanup behavior for stream-like processing.
 package enumerators
 
+import "errors"
+
+var (
+	// ErrEmptySequence is returned when an operation expects at least one element but the sequence is empty.
+	ErrEmptySequence = errors.New("sequence contains no elements")
+	// ErrDisposed is returned when attempting to access a disposed enumerator.
+	ErrDisposed = errors.New("enumerator disposed")
+)
+
 // Enumerator represents a generic iterator over a sequence of values of type T.
 // It should be disposed when no longer needed.
 type Enumerator[T any] interface {

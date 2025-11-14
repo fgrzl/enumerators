@@ -102,7 +102,7 @@ func TestShouldProcessElementsSequentiallyWhenIteratingStepByStep(t *testing.T) 
 	hasFirst := mapped.MoveNext()
 	firstCurrent, firstErr := mapped.Current()
 
-	// Act - Second element  
+	// Act - Second element
 	hasSecond := mapped.MoveNext()
 	secondCurrent, secondErr := mapped.Current()
 
@@ -202,4 +202,61 @@ func TestToMapWithKey_NilEnumerator(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.Nil(t, result)
+}
+
+func TestShouldStopMappingWhenMapperReturnsError(t *testing.T) {
+	// Arrange
+	input := Slice([]int{1, 2, 3, 4, 5})
+	mapper := func(x int) (int, error) {
+		if x == 3 {
+			return 0, assert.AnError
+		}
+		return x * 2, nil
+	}
+
+	// Act
+	mapped := Map(input, mapper)
+	result, err := ToSlice(mapped)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, assert.AnError, err)
+	assert.Equal(t, []int{2, 4}, result) // Should have processed 1 and 2 before error
+}
+
+func BenchmarkMap(b *testing.B) {
+	input := make([]int, 10000)
+	for i := range input {
+		input[i] = i
+	}
+	doubler := func(x int) (int, error) { return x * 2, nil }
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		enumerator := Slice(input)
+		mapped := Map(enumerator, doubler)
+		for mapped.MoveNext() {
+			_, _ = mapped.Current()
+		}
+		mapped.Dispose()
+	}
+}
+
+func FuzzMap(f *testing.F) {
+	f.Add([]byte{1, 2, 3}, 10)
+	f.Fuzz(func(t *testing.T, inputBytes []byte, multiplier int) {
+		input := make([]int, len(inputBytes))
+		for i, b := range inputBytes {
+			input[i] = int(b)
+		}
+		enumerator := Slice(input)
+		mapped := Map(enumerator, func(x int) (int, error) {
+			return x * multiplier, nil
+		})
+		result, err := ToSlice(mapped)
+		assert.NoError(t, err)
+		assert.Len(t, result, len(input))
+		for i, v := range result {
+			assert.Equal(t, input[i]*multiplier, v)
+		}
+	})
 }

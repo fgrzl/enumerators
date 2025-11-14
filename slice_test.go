@@ -118,3 +118,79 @@ func TestShouldReturnEmptySliceWhenConvertingEmptyEnumeratorToSlice(t *testing.T
 	assert.NoError(t, err)
 	assert.Empty(t, result)
 }
+
+func BenchmarkSliceIteration(b *testing.B) {
+	input := make([]int, 10000)
+	for i := range input {
+		input[i] = i
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		enumerator := enumerators.Slice(input)
+		for enumerator.MoveNext() {
+			_, _ = enumerator.Current()
+		}
+		enumerator.Dispose()
+	}
+}
+
+func BenchmarkSliceToSlice(b *testing.B) {
+	input := make([]int, 10000)
+	for i := range input {
+		input[i] = i
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		enumerator := enumerators.Slice(input)
+		_, _ = enumerators.ToSlice(enumerator)
+	}
+}
+
+func BenchmarkDirectSliceIteration(b *testing.B) {
+	input := make([]int, 10000)
+	for i := range input {
+		input[i] = i
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sum := 0
+		for _, v := range input {
+			sum += v
+		}
+		_ = sum
+	}
+}
+
+func TestShouldConsumeRemainingElementsWhenPartiallyConsumed(t *testing.T) {
+	// Arrange
+	enumerator := enumerators.Slice([]int{1, 2, 3, 4, 5})
+
+	// Act - consume first two
+	assert.True(t, enumerator.MoveNext())
+	first, _ := enumerator.Current()
+	assert.Equal(t, 1, first)
+	assert.True(t, enumerator.MoveNext())
+	second, _ := enumerator.Current()
+	assert.Equal(t, 2, second)
+
+	// Now consume remaining
+	result, err := enumerators.ToSlice(enumerator)
+
+	// Assert
+	assert.NoError(t, err)
+	assert.Equal(t, []int{3, 4, 5}, result)
+}
+
+func FuzzToSlice(f *testing.F) {
+	f.Add([]byte{1, 2, 3})
+	f.Fuzz(func(t *testing.T, inputBytes []byte) {
+		input := make([]int, len(inputBytes))
+		for i, b := range inputBytes {
+			input[i] = int(b)
+		}
+		enumerator := enumerators.Slice(input)
+		result, err := enumerators.ToSlice(enumerator)
+		assert.NoError(t, err)
+		assert.Equal(t, input, result)
+	})
+}

@@ -12,6 +12,7 @@ type takeWhileEnumerator[T any] struct {
 // Stops when the condition fails for any element.
 func (e *takeWhileEnumerator[T]) MoveNext() bool {
 	if !e.base.MoveNext() {
+		e.err = e.base.Err() // Propagate any error from base enumerator
 		return false
 	}
 
