@@ -16,6 +16,7 @@ type GroupingSlice[T any, G comparable] struct {
 	Group G
 }
 
+// GroupEnumerator yields adjacent groups produced by applying a key selector to the base enumerator.
 type GroupEnumerator[T any, G comparable] struct {
 	base         Enumerator[T]
 	compute      func(item T) (G, error)
@@ -24,6 +25,7 @@ type GroupEnumerator[T any, G comparable] struct {
 	exhausted    bool
 }
 
+// Dispose releases the current grouping and the underlying enumerator.
 func (e *GroupEnumerator[T, G]) Dispose() {
 	if e.currentChunk != nil {
 		e.currentChunk.Enumerator.Dispose()
@@ -33,6 +35,7 @@ func (e *GroupEnumerator[T, G]) Dispose() {
 	}
 }
 
+// MoveNext advances to the next adjacent group in the sequence.
 func (e *GroupEnumerator[T, G]) MoveNext() bool {
 
 	if e.exhausted {
@@ -95,6 +98,7 @@ func (e *GroupEnumerator[T, G]) MoveNext() bool {
 	return true
 }
 
+// Current returns the current grouping.
 func (e *GroupEnumerator[T, G]) Current() (*Grouping[T, G], error) {
 	if e.currentChunk == nil {
 		return nil, errors.New("no current chunk")
@@ -102,6 +106,7 @@ func (e *GroupEnumerator[T, G]) Current() (*Grouping[T, G], error) {
 	return e.currentChunk, e.currentChunk.Enumerator.err
 }
 
+// Err returns the current grouping error, if any.
 func (e *GroupEnumerator[T, G]) Err() error {
 	if e.currentChunk == nil {
 		return errors.New("no current chunk")
@@ -175,6 +180,8 @@ func (c *innerGroupEnumerator[T, G]) Err() error {
 	return c.err
 }
 
+// Group groups adjacent items that produce the same key from the compute function.
+// Each grouping must be fully consumed before advancing to the next grouping.
 func Group[T any, G comparable](
 	in Enumerator[T],
 	compute func(item T) (G, error),
@@ -183,7 +190,7 @@ func Group[T any, G comparable](
 
 }
 
-// CollectGroupingSlices gathers all chunks into a slice of slices
+// CollectGroupingSlices materializes all groupings into slices keyed by their group value.
 func CollectGroupingSlices[T any, G comparable](enumerator Enumerator[*Grouping[T, G]]) (groupSlices []*GroupingSlice[T, G], err error) {
 	defer enumerator.Dispose()
 	for enumerator.MoveNext() {

@@ -9,7 +9,7 @@ A small utility library for defining and consuming enumerators in Go. It provide
 
 ```bash
 go get github.com/fgrzl/enumerators
-````
+```
 
 ## Overview
 
@@ -52,7 +52,6 @@ for e.MoveNext() {
   fmt.Println(v)
 }
 ```
-```
 
 ### ChannelEnumerator
 
@@ -74,6 +73,8 @@ for e.MoveNext() {
   fmt.Println(v)
 }
 ```
+
+If the context passed to `Channel` is canceled, iteration stops and `Err()` returns the context error. `Publish` returns `false` after completion, disposal, or cancellation.
 
 ## Automatic Disposal
 
@@ -108,6 +109,20 @@ result, err := enumerators.ToSlice(
   ),
 )
 // result: []string{"num_2", "num_4"}
+```
+
+## Grouping Example
+
+`Group` emits adjacent groups, so each group should be consumed before moving to the next one.
+
+```go
+grouped := enumerators.Group(
+  enumerators.Slice([]string{"ant", "ape", "bat", "bee"}),
+  func(item string) (byte, error) { return item[0], nil },
+)
+
+groups, err := enumerators.CollectGroupingSlices(grouped)
+// groups: [{Group: 'a', Items: ["ant", "ape"]}, {Group: 'b', Items: ["bat", "bee"]}]
 ```
 
 ## Performance Considerations

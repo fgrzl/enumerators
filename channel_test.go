@@ -3,6 +3,7 @@ package enumerators_test
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -66,14 +67,12 @@ func TestChannel_PublishWithError(t *testing.T) {
 	assert.True(t, ch.Publish(1))
 	ch.Error(expectedError)
 
-	// Consume - ToSlice will stop when error is encountered
-	// Note: Due to channel select behavior, error might be processed before data
+	// Consume - ToSlice will stop when error is encountered.
 	result, err := enumerators.ToSlice(ch)
 
 	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, expectedError, err)
-	// Result may be empty if error is processed first, or contain [1] if data is processed first
 	assert.True(t, len(result) == 0 || (len(result) == 1 && result[0] == 1))
 }
 
@@ -108,65 +107,58 @@ func TestChannel_StepByStep(t *testing.T) {
 func TestChannel_ContextCancellation(t *testing.T) {
 	// Arrange
 	ctx, cancel := context.WithCancel(context.Background())
-	ch := enumerators.Channel[int](ctx, 0) // Use unbuffered channel
+	ch := enumerators.Channel[int](ctx, 0)
 
 	// Act
-	// Fill the channel first
 	go func() {
 		time.Sleep(10 * time.Millisecond)
-		ch.Publish(1) // This should succeed
+		ch.Publish(1)
 	}()
 
-	// Move to consume the value
 	assert.True(t, ch.MoveNext())
 	value, err := ch.Current()
 	assert.NoError(t, err)
 	assert.Equal(t, 1, value)
 
-	// Cancel context
 	cancel()
 
-	// Give the context cancellation time to propagate
-	time.Sleep(20 * time.Millisecond)
-
-	// Publishing after cancel should fail
-	canPublish := ch.Publish(2)
-
 	// Assert
-	assert.False(t, canPublish)
+	assert.False(t, ch.MoveNext())
+	assert.False(t, ch.Publish(2))
+	assert.ErrorIs(t, ch.Err(), context.Canceled)
 }
 
 func TestChannel_ContextTimeout(t *testing.T) {
 	// Arrange
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
-	ch := enumerators.Channel[int](ctx, 1) // Small buffer
+	ch := enumerators.Channel[int](ctx, 1)
 
-	// Act - publish one value before timeout
+	// Act
 	assert.True(t, ch.Publish(1))
+	assert.True(t, ch.MoveNext())
+	value, err := ch.Current()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, value)
 
-	// Wait for timeout to occur - use longer wait to ensure timeout happens
 	time.Sleep(100 * time.Millisecond)
 
-	// Verify context is done
 	select {
 	case <-ctx.Done():
-		// Context is properly timed out
 	default:
 		t.Fatal("Context should be timed out")
 	}
 
-	// Publishing after timeout should fail
-	canPublish := ch.Publish(2)
-
 	// Assert
-	assert.False(t, canPublish, "Publishing after context timeout should return false")
+	assert.False(t, ch.MoveNext())
+	assert.False(t, ch.Publish(2), "Publishing after context timeout should return false")
+	assert.ErrorIs(t, ch.Err(), context.DeadlineExceeded)
 }
 
 func TestChannel_BufferedChannel(t *testing.T) {
 	// Arrange
 	ctx := context.Background()
-	ch := enumerators.Channel[int](ctx, 2) // Small buffer
+	ch := enumerators.Channel[int](ctx, 2)
 
 	// Act - fill buffer exactly
 	assert.True(t, ch.Publish(1))
@@ -204,7 +196,7 @@ func TestChannel_DisposeAfterComplete(t *testing.T) {
 
 	// Act
 	ch.Complete()
-	ch.Dispose() // Should not panic
+	ch.Dispose()
 
 	// Assert - publishing after dispose should fail gracefully
 	assert.False(t, ch.Publish(1))
@@ -220,7 +212,7 @@ func TestChannel_CurrentBeforeMoveNext(t *testing.T) {
 
 	// Assert
 	assert.NoError(t, err)
-	assert.Equal(t, 0, current) // zero value for int
+	assert.Equal(t, 0, current)
 }
 
 func TestChannel_ErrorHandling(t *testing.T) {
@@ -246,16 +238,90 @@ func TestChannel_MultipleErrors(t *testing.T) {
 
 	// Act
 	ch.Error(firstError)
-	ch.Error(secondError) // Second error might be ignored
+	ch.Error(secondError)
 
 	// Assert
 	assert.False(t, ch.MoveNext())
-	assert.Equal(t, firstError, ch.Err()) // Should get first error
+	assert.Equal(t, firstError, ch.Err())
+}
+
+func TestChannel_ErrorAfterComplete(t *testing.T) {
+	// Arrange
+	ctx := context.Background()
+	ch := enumerators.Channel[int](ctx, 1)
+
+	// Act
+	ch.Complete()
+	assert.NotPanics(t, func() {
+		ch.Error(errors.New("late error"))
+	})
+
+	// Assert
+	assert.False(t, ch.MoveNext())
+	assert.NoError(t, ch.Err())
+}
+
+func TestChannel_ErrorAfterDispose(t *testing.T) {
+	// Arrange
+	ctx := context.Background()
+	ch := enumerators.Channel[int](ctx, 1)
+
+	// Act
+	ch.Dispose()
+	assert.NotPanics(t, func() {
+		ch.Error(errors.New("late error"))
+	})
+
+	// Assert
+	assert.False(t, ch.MoveNext())
+	assert.NoError(t, ch.Err())
 }
 
 func TestChannel_ConcurrentPublish(t *testing.T) {
-	// This test is commented out as it may cause issues in test environments
-	// due to goroutine scheduling and timeouts. The basic functionality
-	// is covered by other tests.
-	t.Skip("Skipping concurrent test to avoid timeouts in CI")
+	// Arrange
+	ctx := context.Background()
+	const publisherCount = 8
+	const itemsPerPublisher = 25
+	ch := enumerators.Channel[int](ctx, 8)
+	expected := make([]int, 0, publisherCount*itemsPerPublisher)
+	publishErrors := make(chan error, publisherCount)
+
+	for publisher := 0; publisher < publisherCount; publisher++ {
+		for item := 0; item < itemsPerPublisher; item++ {
+			expected = append(expected, publisher*itemsPerPublisher+item)
+		}
+	}
+
+	var wg sync.WaitGroup
+	for publisher := 0; publisher < publisherCount; publisher++ {
+		publisher := publisher
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for item := 0; item < itemsPerPublisher; item++ {
+				value := publisher*itemsPerPublisher + item
+				if !ch.Publish(value) {
+					publishErrors <- errors.New("publish failed")
+					return
+				}
+			}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(publishErrors)
+		ch.Complete()
+	}()
+
+	// Act
+	result, err := enumerators.ToSlice(ch)
+
+	// Assert
+	require.NoError(t, err)
+	for publishErr := range publishErrors {
+		require.NoError(t, publishErr)
+	}
+	assert.Len(t, result, publisherCount*itemsPerPublisher)
+	assert.ElementsMatch(t, expected, result)
 }
