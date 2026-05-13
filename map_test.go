@@ -140,7 +140,7 @@ func TestMap_Dispose(t *testing.T) {
 
 func TestToMap_NilEnumerator(t *testing.T) {
 	// Arrange & Act
-	result, err := ToMap[int, int, string](nil, func(x int) int { return x }, func(x int) string { return strconv.Itoa(x) })
+	result, err := ToMap[int, int, string](nil, func(x int) int { return x }, strconv.Itoa)
 
 	// Assert
 	assert.NoError(t, err)
@@ -152,7 +152,7 @@ func TestToMap_EmptyEnumerator(t *testing.T) {
 	input := Empty[int]()
 
 	// Act
-	result, err := ToMap(input, func(x int) int { return x }, func(x int) string { return strconv.Itoa(x) })
+	result, err := ToMap(input, func(x int) int { return x }, strconv.Itoa)
 
 	// Assert
 	assert.NoError(t, err)

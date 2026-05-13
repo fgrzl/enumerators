@@ -9,7 +9,6 @@ import (
 
 // TestInterleave_Basic tests the interleaving of three slice enumerators.
 func TestInterleave_Basic(t *testing.T) {
-
 	// Arrange
 	enumerator1 := enumerators.Slice([]int{1, 4, 7})
 	enumerator2 := enumerators.Slice([]int{2, 5, 8})

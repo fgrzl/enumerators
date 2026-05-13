@@ -44,8 +44,7 @@ func TestShouldCancelMapWithContext(t *testing.T) {
 	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, context.Canceled, err)
-	// Should have processed at least one element before cancellation
-	assert.True(t, len(result) >= 0)
+	assert.GreaterOrEqual(t, len(result), 1)
 }
 
 func TestShouldFilterWithContext(t *testing.T) {

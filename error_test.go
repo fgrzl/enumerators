@@ -11,7 +11,7 @@ import (
 func TestShouldReturnProvidedErrorWhenCreatedWithError(t *testing.T) {
 	// Arrange
 	expectedError := errors.New("test error")
-	
+
 	// Act
 	errorEnum := enumerators.Error[int](expectedError)
 	hasMoved := errorEnum.MoveNext()
@@ -20,7 +20,7 @@ func TestShouldReturnProvidedErrorWhenCreatedWithError(t *testing.T) {
 	// Assert
 	assert.False(t, hasMoved)
 	assert.Equal(t, expectedError, errorEnum.Err())
-	assert.Equal(t, 0, current)      // zero value for int
+	assert.Equal(t, 0, current) // zero value for int
 	assert.Equal(t, expectedError, currentErr)
 }
 

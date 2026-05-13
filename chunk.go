@@ -1,12 +1,11 @@
 package enumerators
 
 import (
+	"cmp"
 	"errors"
-
-	"golang.org/x/exp/constraints"
 )
 
-type chunkEnumerator[T any, TSize constraints.Ordered] struct {
+type chunkEnumerator[T any, TSize cmp.Ordered] struct {
 	base         Enumerator[T]
 	target       TSize
 	compute      func(item T) (TSize, error)
@@ -25,7 +24,6 @@ func (e *chunkEnumerator[T, TSize]) Dispose() {
 }
 
 func (e *chunkEnumerator[T, TSize]) MoveNext() bool {
-
 	if e.exhausted {
 		return false
 	}
@@ -76,7 +74,7 @@ func (e *chunkEnumerator[T, TSize]) Err() error {
 	return e.currentChunk.err
 }
 
-type innerChunkEnumerator[T any, TSize constraints.Ordered] struct {
+type innerChunkEnumerator[T any, TSize cmp.Ordered] struct {
 	base       Enumerator[T]
 	compute    func(item T) (TSize, error)
 	target     TSize
@@ -135,14 +133,14 @@ func (e *innerChunkEnumerator[T, TSize]) Current() (T, error) {
 	return e.current, e.err
 }
 
-func (c *innerChunkEnumerator[T, TSize]) Err() error {
-	return c.err
+func (e *innerChunkEnumerator[T, TSize]) Err() error {
+	return e.err
 }
 
 // Chunk creates an enumerator that groups elements into chunks based on a target size.
 // The compute function determines the size contribution of each element.
 // Each chunk is yielded as a separate enumerator when the cumulative size reaches or exceeds the target.
-func Chunk[T any, TSize constraints.Ordered](
+func Chunk[T any, TSize cmp.Ordered](
 	in Enumerator[T],
 	target TSize,
 	compute func(item T) (TSize, error),

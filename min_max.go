@@ -1,23 +1,23 @@
 package enumerators
 
 import (
-	"golang.org/x/exp/constraints"
+	"cmp"
 )
 
 // Min returns the minimum element in the enumerator.
 // If the enumerator is empty, returns the zero value.
 // The enumerator is disposed after finding the minimum.
-func Min[T constraints.Ordered](enumerator Enumerator[T]) (T, error) {
+func Min[T cmp.Ordered](enumerator Enumerator[T]) (T, error) {
 	defer enumerator.Dispose()
-	var min T
+	var minVal T
 	found := false
 	for enumerator.MoveNext() {
 		item, err := enumerator.Current()
 		if err != nil {
-			return min, err
+			return minVal, err
 		}
-		if !found || item < min {
-			min = item
+		if !found || item < minVal {
+			minVal = item
 			found = true
 		}
 	}
@@ -25,23 +25,23 @@ func Min[T constraints.Ordered](enumerator Enumerator[T]) (T, error) {
 		var zero T
 		return zero, enumerator.Err()
 	}
-	return min, enumerator.Err()
+	return minVal, enumerator.Err()
 }
 
 // Max returns the maximum element in the enumerator.
 // If the enumerator is empty, returns the zero value.
 // The enumerator is disposed after finding the maximum.
-func Max[T constraints.Ordered](enumerator Enumerator[T]) (T, error) {
+func Max[T cmp.Ordered](enumerator Enumerator[T]) (T, error) {
 	defer enumerator.Dispose()
-	var max T
+	var maxVal T
 	found := false
 	for enumerator.MoveNext() {
 		item, err := enumerator.Current()
 		if err != nil {
-			return max, err
+			return maxVal, err
 		}
-		if !found || item > max {
-			max = item
+		if !found || item > maxVal {
+			maxVal = item
 			found = true
 		}
 	}
@@ -49,5 +49,5 @@ func Max[T constraints.Ordered](enumerator Enumerator[T]) (T, error) {
 		var zero T
 		return zero, enumerator.Err()
 	}
-	return max, enumerator.Err()
+	return maxVal, enumerator.Err()
 }

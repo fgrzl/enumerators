@@ -30,7 +30,7 @@ func (e *SliceEnumerator[T]) Err() error {
 }
 
 // Dispose cleans up resources. For SliceEnumerator, this is a no-op.
-func (enumerator *SliceEnumerator[T]) Dispose() {
+func (e *SliceEnumerator[T]) Dispose() {
 	// no-op
 }
 

@@ -37,7 +37,6 @@ func (e *GroupEnumerator[T, G]) Dispose() {
 
 // MoveNext advances to the next adjacent group in the sequence.
 func (e *GroupEnumerator[T, G]) MoveNext() bool {
-
 	if e.exhausted {
 		return false
 	}
@@ -176,8 +175,8 @@ func (e *innerGroupEnumerator[T, G]) Current() (T, error) {
 	return e.current, e.err
 }
 
-func (c *innerGroupEnumerator[T, G]) Err() error {
-	return c.err
+func (e *innerGroupEnumerator[T, G]) Err() error {
+	return e.err
 }
 
 // Group groups adjacent items that produce the same key from the compute function.
@@ -187,14 +186,12 @@ func Group[T any, G comparable](
 	compute func(item T) (G, error),
 ) Enumerator[*Grouping[T, G]] {
 	return &GroupEnumerator[T, G]{base: in, compute: compute}
-
 }
 
 // CollectGroupingSlices materializes all groupings into slices keyed by their group value.
 func CollectGroupingSlices[T any, G comparable](enumerator Enumerator[*Grouping[T, G]]) (groupSlices []*GroupingSlice[T, G], err error) {
 	defer enumerator.Dispose()
 	for enumerator.MoveNext() {
-
 		grouping, err := enumerator.Current()
 		if err != nil {
 			return groupSlices, err

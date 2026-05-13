@@ -4,7 +4,7 @@ import "context"
 
 // MapWithContext applies a transformation function to each element with context support.
 // The mapper function receives context for cancellation and the element to transform.
-// If context is cancelled, enumeration stops and returns the cancellation error.
+// If context is canceled, enumeration stops and returns the cancellation error.
 func MapWithContext[T any, U any](ctx context.Context, enumerator Enumerator[T], mapper func(context.Context, T) (U, error)) Enumerator[U] {
 	return &mapContextEnumerator[T, U]{
 		ctx:    ctx,
@@ -64,7 +64,7 @@ func (e *mapContextEnumerator[T, U]) Dispose() {
 
 // FilterWithContext filters elements based on a predicate with context support.
 // The predicate function receives context for cancellation.
-// If context is cancelled, enumeration stops and returns the cancellation error.
+// If context is canceled, enumeration stops and returns the cancellation error.
 func FilterWithContext[T any](ctx context.Context, enumerator Enumerator[T], predicate func(context.Context, T) bool) Enumerator[T] {
 	return &filterContextEnumerator[T]{
 		ctx:       ctx,

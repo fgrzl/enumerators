@@ -294,7 +294,6 @@ func TestChannel_ConcurrentPublish(t *testing.T) {
 
 	var wg sync.WaitGroup
 	for publisher := 0; publisher < publisherCount; publisher++ {
-		publisher := publisher
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

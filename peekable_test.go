@@ -71,10 +71,10 @@ func TestPeekable_HasNext(t *testing.T) {
 
 	// Act & Assert
 	assert.True(t, peekable.HasNext())
-	
+
 	assert.True(t, peekable.MoveNext())
 	assert.True(t, peekable.HasNext())
-	
+
 	assert.True(t, peekable.MoveNext())
 	assert.False(t, peekable.HasNext())
 }
@@ -106,7 +106,7 @@ func TestPeekable_SingleElement(t *testing.T) {
 	assert.Equal(t, "hello", value)
 
 	assert.True(t, peekable.HasNext())
-	
+
 	assert.True(t, peekable.MoveNext())
 	current, err := peekable.Current()
 	require.NoError(t, err)
@@ -201,7 +201,7 @@ func TestPeekable_ErrorHandling(t *testing.T) {
 
 	// Act & Assert - Err should delegate to base
 	assert.NoError(t, peekable.Err())
-	
+
 	// Peek and move should still work
 	assert.True(t, peekable.HasNext())
 	assert.True(t, peekable.MoveNext())

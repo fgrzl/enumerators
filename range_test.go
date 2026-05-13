@@ -9,7 +9,7 @@ import (
 )
 
 func TestShouldGenerateSequenceWhenCreatingBasicRange(t *testing.T) {
-	// Arrange 
+	// Arrange
 	generator := func(i int) int { return i * 2 }
 
 	// Act
@@ -48,7 +48,7 @@ func TestShouldGenerateOneItemWhenRangeCountIsOne(t *testing.T) {
 }
 
 func TestShouldReturnEmptyWhenRangeCountIsNegative(t *testing.T) {
-	// Arrange 
+	// Arrange
 	generator := func(i int) int { return i }
 
 	// Act - negative count should produce empty result

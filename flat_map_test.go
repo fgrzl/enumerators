@@ -11,12 +11,9 @@ import (
 func TestFlatMap_BasicFlattening(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]int{{1, 2}, {3, 4}, {5}})
-	flattenSlice := func(slice []int) enumerators.Enumerator[int] {
-		return enumerators.Slice(slice)
-	}
 
 	// Act
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[int])
 	result, err := enumerators.ToSlice(flattened)
 
 	// Assert
@@ -27,12 +24,9 @@ func TestFlatMap_BasicFlattening(t *testing.T) {
 func TestFlatMap_EmptyInput(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]int{})
-	flattenSlice := func(slice []int) enumerators.Enumerator[int] {
-		return enumerators.Slice(slice)
-	}
 
 	// Act
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[int])
 	result, err := enumerators.ToSlice(flattened)
 
 	// Assert
@@ -43,12 +37,9 @@ func TestFlatMap_EmptyInput(t *testing.T) {
 func TestFlatMap_EmptySubSequences(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]int{{1, 2}, {}, {3, 4}})
-	flattenSlice := func(slice []int) enumerators.Enumerator[int] {
-		return enumerators.Slice(slice)
-	}
 
 	// Act
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[int])
 	result, err := enumerators.ToSlice(flattened)
 
 	// Assert
@@ -59,12 +50,9 @@ func TestFlatMap_EmptySubSequences(t *testing.T) {
 func TestFlatMap_SingleElement(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]string{{"hello", "world"}})
-	flattenSlice := func(slice []string) enumerators.Enumerator[string] {
-		return enumerators.Slice(slice)
-	}
 
 	// Act
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[string])
 	result, err := enumerators.ToSlice(flattened)
 
 	// Assert
@@ -108,10 +96,7 @@ func TestFlatMap_NumberToRange(t *testing.T) {
 func TestFlatMap_StepByStep(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]int{{10, 20}, {30}})
-	flattenSlice := func(slice []int) enumerators.Enumerator[int] {
-		return enumerators.Slice(slice)
-	}
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[int])
 
 	// Act & Assert
 	assert.True(t, flattened.MoveNext())
@@ -137,7 +122,7 @@ func TestFlatMap_DisposesSubEnumerators(t *testing.T) {
 	// Arrange
 	disposed1 := false
 	disposed2 := false
-	
+
 	input := enumerators.Slice([]int{1, 2})
 	createEnum := func(n int) enumerators.Enumerator[int] {
 		var cleanup func()
@@ -166,14 +151,11 @@ func TestFlatMap_DisposesSubEnumerators(t *testing.T) {
 func TestFlatMap_Dispose(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]int{{1, 2}, {3, 4}})
-	flattenSlice := func(slice []int) enumerators.Enumerator[int] {
-		return enumerators.Slice(slice)
-	}
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[int])
 
 	// Move to start working with sub-enumerator
 	assert.True(t, flattened.MoveNext())
-	
+
 	// Act
 	flattened.Dispose() // Should dispose base and current sub-enumerator
 
@@ -187,10 +169,7 @@ func TestFlatMap_Dispose(t *testing.T) {
 func TestFlatMap_CurrentBeforeMoveNext(t *testing.T) {
 	// Arrange
 	input := enumerators.Slice([][]int{{1, 2}})
-	flattenSlice := func(slice []int) enumerators.Enumerator[int] {
-		return enumerators.Slice(slice)
-	}
-	flattened := enumerators.FlatMap(input, flattenSlice)
+	flattened := enumerators.FlatMap(input, enumerators.Slice[int])
 
 	// Act - calling Current before MoveNext should return error
 	current, err := flattened.Current()

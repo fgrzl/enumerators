@@ -80,30 +80,11 @@ func TestShouldReturnElementsWhileConditionHoldsWhenStringConditionProvided(t *t
 }
 
 func TestShouldAllowStepByStepIterationWhenConditionHolds(t *testing.T) {
-	// Arrange
 	input := enumerators.Slice([]int{2, 4, 6, 7, 8})
 	isEven := func(x int) bool { return x%2 == 0 }
 	taken := enumerators.TakeWhile(input, isEven)
-
-	// Act & Assert
-	assert.True(t, taken.MoveNext())
-	current, err := taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 2, current)
-
-	assert.True(t, taken.MoveNext())
-	current, err = taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 4, current)
-
-	assert.True(t, taken.MoveNext())
-	current, err = taken.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 6, current)
-
-	// Should stop at 7 (odd number)
-	assert.False(t, taken.MoveNext())
-	assert.NoError(t, taken.Err())
+	// Stops before 7 (odd); TakeWhile does not yield 7.
+	assertIntEnumeratorYields(t, taken, []int{2, 4, 6})
 }
 
 func TestShouldReturnSingleElementWhenConditionHoldsForOneElement(t *testing.T) {

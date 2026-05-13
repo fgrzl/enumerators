@@ -184,7 +184,6 @@ func TestChunk_CustomStruct(t *testing.T) {
 }
 
 func TestChunk_BubbleError(t *testing.T) {
-
 	// Arrange
 	source := enumerators.Slice([]int{1, 2, 3, 4, 5})
 	chunks := enumerators.Chunk(source, 5, func(item int) (int, error) {

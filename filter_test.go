@@ -86,29 +86,10 @@ func TestFilter_StringFiltering(t *testing.T) {
 }
 
 func TestFilter_StepByStep(t *testing.T) {
-	// Arrange
 	input := enumerators.Slice([]int{1, 2, 3, 4, 5})
 	isOdd := func(x int) bool { return x%2 == 1 }
 	filtered := enumerators.Filter(input, isOdd)
-
-	// Act & Assert
-	assert.True(t, filtered.MoveNext())
-	current, err := filtered.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 1, current)
-
-	assert.True(t, filtered.MoveNext())
-	current, err = filtered.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 3, current)
-
-	assert.True(t, filtered.MoveNext())
-	current, err = filtered.Current()
-	require.NoError(t, err)
-	assert.Equal(t, 5, current)
-
-	assert.False(t, filtered.MoveNext())
-	assert.NoError(t, filtered.Err())
+	assertIntEnumeratorYields(t, filtered, []int{1, 3, 5})
 }
 
 func TestFilter_Dispose(t *testing.T) {
@@ -157,7 +138,7 @@ func BenchmarkFilter(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		filtered := enumerators.Filter(enumerator, isEven)
-		enumerators.Consume(filtered)
+		require.NoError(b, enumerators.Consume(filtered))
 	}
 }
 

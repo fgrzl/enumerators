@@ -81,7 +81,7 @@ func TestShouldStopAfterSpecifiedCountWhenIteratingStepByStep(t *testing.T) {
 	// Act - First element
 	hasFirst := taken.MoveNext()
 	firstCurrent, firstErr := taken.Current()
-	
+
 	// Act - Second element
 	hasSecond := taken.MoveNext()
 	secondCurrent, secondErr := taken.Current()
