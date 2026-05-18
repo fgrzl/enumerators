@@ -1,48 +1,60 @@
 # Operations
 
-Pipeline functions take an `Enumerator[T]` and return a new enumerator. Unless noted, callers must still dispose the outermost enumerator (or use `ForEach` / `ToSlice` helpers that handle disposal).
+Pipeline functions take an `Enumerator[T]` and return a new enumerator. Dispose the outermost enumerator when you own the chain (or use helpers like `ForEach` / `ToSlice` that dispose for you).
 
 ## Transform
 
 | Function | Description |
 |----------|-------------|
-| `Map` | Project each element |
-| `Select` | Alias for `Map` |
-| `Cast` | Change element type with a converter |
+| `Map[T,U](enumerator, func(T) (U, error))` | Project each element; mapper errors stop iteration |
+| `FlatMap` | Map to inner enumerators and flatten |
+| `FilterMap` | Map with optional skip |
 
 ## Filter
 
 | Function | Description |
 |----------|-------------|
 | `Filter` | Keep elements matching predicate |
-| `Where` | Alias for `Filter` |
 | `Take` | First *n* elements |
 | `Skip` | Skip first *n* elements |
-| `TakeWhile` | Prefix while predicate holds |
-| `SkipWhile` | Drop prefix while predicate holds |
-| `Distinct` | Unique elements (comparable) |
+| `TakeWhile` | Prefix while predicate is true |
+| `SkipIf` | Skip elements where predicate is true (not LINQ `SkipWhile`) |
+| `Distinct` | Unique comparable elements |
 
 ## Combine
 
 | Function | Description |
 |----------|-------------|
-| `Concat` | Sequence enumerators back-to-back |
-| `Zip` | Pair-wise combine two enumerators |
+| `Chain[T](enumerators ...Enumerator[T])` | Sequence enumerators back-to-back |
+| `Zip` | Pair-wise combine two enumerators into `Enumerator[Pair[T,U]]` |
+| `Interleave` | Merge ordered streams by priority |
+
+## Group / chunk
+
+| Function | Description |
+|----------|-------------|
+| `Group` | Group by key into `Enumerator[Grouping[T,G]]` |
+| `Chunk` / `ChunkByCount` | Fixed-size sub-enumerators |
+| `Collect` | Materialize `Enumerator[Enumerator[T]]` to `[][]T` |
 
 ## Terminal
 
 | Function | Description |
 |----------|-------------|
-| `ToSlice` | Materialize to `[]T` |
-| `ForEach` | Run side effect per element |
+| `ToSlice` | `([]T, error)` |
+| `ForEach` | Side effect per element |
 | `Any` / `All` | Short-circuit predicates |
-| `Count` | Count elements (may enumerate fully) |
-| `First` / `Last` | Single element with ok flag |
+| `Count` | Element count |
+| `First` / `Last` | `(T, error)` — `ErrEmptySequence` when empty |
+| `Min` / `Max` | Ordered types |
+| `Sum` | With selector |
+
+## Context variants
+
+`MapWithContext`, `FilterWithContext` pass `context.Context` into callbacks.
 
 ## Notes
 
-- Passing a disposed enumerator yields undefined behavior — dispose only the head you own
-- `Channel` enumerators: call `Complete()` when publishing finishes so `MoveNext` terminates
-- Errors from `Current()` do not always stop iteration; check `Err()` after the loop
-
-For signatures and edge cases, see package godoc and tests under the repository root.
+- `Channel` enumerators: call `Complete()` when publishing finishes
+- Check `Err()` after loops; `Current()` can return per-element errors
+- See package godoc and tests for full signatures

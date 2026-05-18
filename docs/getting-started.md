@@ -44,7 +44,7 @@ Canceling the context stops iteration; `Err()` returns the context error.
 ```go
 nums := enumerators.Slice([]int{1, 2, 3, 4, 5})
 evens := enumerators.Filter(nums, func(n int) bool { return n%2 == 0 })
-doubled := enumerators.Map(evens, func(n int) int { return n * 2 })
+doubled, _ := enumerators.Map(evens, func(n int) (int, error) { return n * 2, nil })
 
 defer doubled.Dispose()
 for doubled.MoveNext() {
@@ -53,9 +53,9 @@ for doubled.MoveNext() {
 }
 ```
 
-Prefer helpers like `enumerators.ForEach` when they dispose the chain for you.
+Prefer `enumerators.ForEach` when it disposes the chain for you.
 
 ## Next steps
 
-- [Operations](operations.md) — full list of combinators
-- [Overview](overview.md) — disposal rules and error handling
+- [Operations](operations.md) — combinators in this package
+- [Overview](overview.md) — disposal and error handling

@@ -25,7 +25,7 @@ Always **`Dispose()`** enumerators when done (or use helpers that dispose automa
 
 ## Composition
 
-Operations (`Map`, `Filter`, `Take`, `Skip`, `Distinct`, `Concat`, etc.) return new enumerators. Most pipeline helpers dispose upstream enumerators when the pipeline ends.
+Operations (`Map`, `Filter`, `Take`, `Skip`, `Distinct`, `Chain`, etc.) return new enumerators. Most pipeline helpers dispose upstream enumerators when the pipeline ends.
 
 ## Design goals
 
