@@ -11,6 +11,10 @@ A small utility library for defining and consuming enumerators in Go. It provide
 go get github.com/fgrzl/enumerators
 ```
 
+## Documentation
+
+Guides: **[docs/](docs/README.md)** — [overview](docs/overview.md), [getting started](docs/getting-started.md), [operations](docs/operations.md)
+
 ## Overview
 
 This library defines a generic `Enumerator[T]` interface with concrete implementations for common data sources:
